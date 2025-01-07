@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Logo from '../components/Logo';
+import toast from 'react-hot-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -16,6 +17,7 @@ export default function Login() {
   const [errors, setErrors] = useState({ email: '', password: '' });
   const { isDarkMode, toggleTheme } = useAppTheme();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors = { email: '', password: '' };
@@ -42,17 +44,28 @@ export default function Login() {
     e.preventDefault();
     if (!validateForm()) return;
     
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    setIsLoading(true);
+    const loadingToast = toast.loading('Signing in...');
+    
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (res.ok) {
-      router.push('/dashboard');
-    } else {
-      const data = await res.json();
-      alert(data.error || 'Login failed');
+      if (res.ok) {
+        toast.success('Welcome back!', { id: loadingToast });
+        // Use replace instead of push to prevent back navigation
+        await router.replace('/dashboard');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Login failed', { id: loadingToast });
+      }
+    } catch (error) {
+      toast.error('Connection error', { id: loadingToast });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,9 +146,10 @@ export default function Login() {
             fullWidth
             variant="contained"
             size="large"
+            disabled={isLoading}
             sx={{ mb: 3 }}
           >
-            Sign In
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
           <Link href="/register" style={{ textDecoration: 'none' }}>
             <Typography 

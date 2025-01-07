@@ -5,16 +5,23 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const { isDarkMode, toggleTheme } = useAppTheme();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
-    router.push('/login');
+    const loadingToast = toast.loading('Logging out...');
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+      toast.success('Logged out successfully', { id: loadingToast });
+      router.push('/login');
+    } catch (error) {
+      toast.error('Error logging out', { id: loadingToast });
+    }
   };
 
   return (

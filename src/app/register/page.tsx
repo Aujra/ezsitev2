@@ -8,6 +8,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '../components/Logo';
+import toast from 'react-hot-toast';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -53,17 +54,24 @@ export default function Register() {
     e.preventDefault();
     if (!validateForm()) return;
     
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const loadingToast = toast.loading('Creating your account...');
+    
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (res.ok) {
-      router.push('/login');
-    } else {
-      const data = await res.json();
-      alert(data.error || 'Registration failed');
+      if (res.ok) {
+        toast.success('Account created successfully!', { id: loadingToast });
+        router.push('/login');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Registration failed', { id: loadingToast });
+      }
+    } catch (error) {
+      toast.error('Connection error', { id: loadingToast });
     }
   };
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeWrapper } from './theme/ThemeContext';
+import { Toaster } from 'react-hot-toast';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,25 @@ export default function RootLayout({
       <body className={`${inter.variable} ${geistSans.variable} ${geistMono.variable}`}>
         <ThemeWrapper>
           {children}
+          <Toaster position="top-right" toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+            success: {
+              iconTheme: {
+                primary: '#22c55e',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }} />
         </ThemeWrapper>
       </body>
     </html>

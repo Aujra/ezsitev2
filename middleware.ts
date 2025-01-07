@@ -1,56 +1,48 @@
 import { NextResponse } from 'next/server';
-import { verify } from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 import { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  console.log('🔒 Middleware Check -', pathname);
+  console.log('🔒 Auth Check:', pathname);
 
-  // List of public paths that don't require authentication
-  const publicPaths = ['/login', '/register'];
-  
-  // If the path is public, allow access
-  if (publicPaths.includes(pathname)) {
-    return NextResponse.next();
-  }
+  // Skip middleware for specific paths
+  const isPublicPath = 
+    pathname.startsWith('/api') ||        // API routes
+    pathname.startsWith('/_next') ||      // Next.js assets
+    pathname === '/login' ||              // Auth pages
+    pathname === '/register' ||
+    pathname.includes('.') ||             // Static files
+    pathname === '/favicon.ico';
 
-  // Allow static files and API routes
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.') ||
-    pathname === '/favicon.ico'
-  ) {
+  if (isPublicPath) {
     return NextResponse.next();
   }
 
   const token = request.cookies.get('token')?.value;
 
-  // For protected routes, check authentication
   if (!token) {
     console.log('❌ No token - redirecting to login');
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   try {
-    verify(token, process.env.JWT_SECRET!);
-    console.log('✅ Token verified');
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    await jwtVerify(token, secret);
+    console.log('✅ Token verified for:', pathname);
     return NextResponse.next();
   } catch (error) {
-    console.log('❌ Invalid token');
+    console.log('❌ Invalid token', error);
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }
 
-// Update matcher to be more specific
 export const config = {
   matcher: [
     /*
-     * Match all paths except:
-     * - api routes
-     * - static files
-     * - public assets
+     * Match all paths except Next.js assets
+     * This is a simpler matcher that will catch all routes
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image).*)',
   ],
 };
