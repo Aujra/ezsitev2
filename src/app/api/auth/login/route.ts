@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
+import { SignJWT } from 'jose';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +22,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const token = sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '1d' });
+    // Create JWT token using jose
+    const token = await new SignJWT({ userId: user.id })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('24h')
+      .sign(new TextEncoder().encode(process.env.JWT_SECRET));
     
     const response = NextResponse.json({ success: true });
     response.cookies.set('token', token, {
