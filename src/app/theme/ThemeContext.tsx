@@ -27,7 +27,7 @@ const lightTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
       fontSize: '2.5rem',
@@ -51,13 +51,52 @@ const lightTheme = createTheme({
           borderRadius: '8px',
           padding: '8px 16px',
           boxShadow: 'none',
+          position: 'relative',
+          overflow: 'hidden',
           '&:hover': {
             boxShadow: 'none',
           },
         },
         contained: {
+          background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%)',
+          transition: 'all 0.3s ease-in-out',
           '&:hover': {
-            transform: 'translateY(-1px)',
+            background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%)',
+            transform: 'translateY(-2px)',
+            '&::before': {
+              transform: 'scaleX(1.2) translateX(100%)',
+            },
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+            transition: 'transform 0.5s ease-in-out',
+          },
+        },
+        containedSecondary: {
+          background: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%)',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #8b5cf6 100%)',
+            transform: 'translateY(-2px)',
+            '&::before': {
+              transform: 'scaleX(1.2) translateX(100%)',
+            },
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+            transition: 'transform 0.5s ease-in-out',
           },
         },
       },
@@ -107,7 +146,62 @@ const darkTheme = createTheme({
   typography: lightTheme.typography,
   shape: lightTheme.shape,
   components: {
-    ...lightTheme.components,
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
+          padding: '8px 16px',
+          boxShadow: 'none',
+          position: 'relative',
+          overflow: 'hidden',
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+        contained: {
+          background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%)',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%)',
+            transform: 'translateY(-2px)',
+            '&::before': {
+              transform: 'scaleX(1.2) translateX(100%)',
+            },
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+            transition: 'transform 0.5s ease-in-out',
+          },
+        },
+        containedSecondary: {
+          background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%)',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%)',
+            transform: 'translateY(-2px)',
+            '&::before': {
+              transform: 'scaleX(1.2) translateX(100%)',
+            },
+          },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+            transition: 'transform 0.5s ease-in-out',
+          },
+        },
+      },
+    },
     MuiCard: {
       styleOverrides: {
         root: {
