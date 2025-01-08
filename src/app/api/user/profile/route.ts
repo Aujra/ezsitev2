@@ -19,6 +19,12 @@ export async function GET() {
         email: true,
         discordId: true,
         createdAt: true,
+        license: {
+          select: {
+            key: true,
+            timeBalance: true,
+          }
+        }
       },
     });
 

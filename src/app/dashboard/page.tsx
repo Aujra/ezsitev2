@@ -21,6 +21,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ShopIcon from '@mui/icons-material/Shop';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -56,14 +59,9 @@ export default function Dashboard() {
   };
 
   const navItems: NavItem[] = [
-    { text: 'Dashboard', icon: <DashboardIcon /> },
     { text: 'Profile', icon: <PersonIcon /> },
-    { text: 'Settings', icon: <SettingsIcon /> },
-    { 
-      text: 'Logout', 
-      icon: <LogoutIcon />, 
-      onClick: handleLogout 
-    },
+    { text: 'Shop', icon: <ShopIcon /> },
+    { text: 'Orders', icon: <ShoppingCartIcon /> },
   ];
 
   const drawer = (
@@ -93,6 +91,14 @@ export default function Dashboard() {
               {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
             </ListItemIcon>
             <ListItemText primary={isDarkMode ? "Light Mode" : "Dark Mode"} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
+          <ListItemButton onClick={() => router.push('/admin')}>
+            <ListItemIcon>
+              <AdminPanelSettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Go to Admin Dashboard" />
           </ListItemButton>
         </ListItem>
       </List>

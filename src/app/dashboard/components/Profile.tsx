@@ -13,11 +13,16 @@ import {
   Divider
 } from '@mui/material';
 import toast from 'react-hot-toast';
+import { formatDistance } from 'date-fns';
 
 interface UserProfile {
   email: string;
   discordId: string | null;
   createdAt: string;
+  license: {
+    key: string;
+    expiresAt: string;
+  } | null;
 }
 
 interface EditableProfile {
@@ -26,6 +31,21 @@ interface EditableProfile {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+function formatTimeBalance(seconds: number): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (remainingSeconds > 0) parts.push(`${remainingSeconds}s`);
+
+  return parts.length > 0 ? parts.join(' ') : '0s';
 }
 
 export default function Profile() {
@@ -106,6 +126,33 @@ export default function Profile() {
   return (
     <Box>
       <Typography variant="h4" sx={{ mb: 4 }}>Profile</Typography>
+      
+      {/* License Information Card */}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>License Information</Typography>
+        {profile?.license ? (
+          <>
+            <Typography>License Key: {profile.license.key}</Typography>
+            <Typography>
+              Time Remaining: {formatTimeBalance(profile.license.timeBalance)}
+            </Typography>
+            <Button 
+              variant="contained" 
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => router.push('/shop')}
+            >
+              Add More Time
+            </Button>
+          </>
+        ) : (
+          <Alert severity="warning">
+            No license found. Please contact support.
+          </Alert>
+        )}
+      </Paper>
+
+      {/* Existing Profile Information Card */}
       <Paper sx={{ p: 3 }}>
         {!isEditing ? (
           <>
