@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeWrapper } from './theme/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { poppins } from './theme/fonts';
+import { CartProvider } from './context/CartContext';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,26 +19,28 @@ export default function RootLayout({
     <html lang="en" className={poppins.className}>
       <body>
         <ThemeWrapper>
-          {children}
-          <Toaster position="top-right" toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-            success: {
-              iconTheme: {
-                primary: '#22c55e',
-                secondary: '#fff',
+          <CartProvider>
+            {children}
+            <Toaster position="top-right" toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#333',
+                color: '#fff',
               },
-            },
-            error: {
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
+              success: {
+                iconTheme: {
+                  primary: '#22c55e',
+                  secondary: '#fff',
+                },
               },
-            },
-          }} />
+              error: {
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }} />
+          </CartProvider>
         </ThemeWrapper>
       </body>
     </html>

@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { 
   Box, 
@@ -14,6 +13,8 @@ import {
   Divider
 } from '@mui/material';
 import toast from 'react-hot-toast';
+import CartDrawer from './CartDrawer';
+import { useCart } from '../../context/CartContext';
 
 interface UserProfile {
   email: string;
@@ -49,7 +50,6 @@ function formatTimeBalance(seconds: number): string {
 }
 
 export default function Profile() {
-  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +61,8 @@ export default function Profile() {
     newPassword: '',
     confirmPassword: '',
   });
+  const { addItem } = useCart();
+  const [days, setDays] = useState<number>(1);
 
   useEffect(() => {
     fetchProfile();
@@ -120,31 +122,79 @@ export default function Profile() {
     }
   };
 
+  const handleAddToCart = async () => {
+    if (days < 1) {
+      toast.error('Please enter at least 1 day');
+      return;
+    }
+
+    const loadingToast = toast.loading('Adding to cart...');
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'game-time',
+          name: 'Game Time',
+          price: 1, // $1 per day
+          quantity: 1,
+          days: days
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add to cart');
+      }
+
+      addItem({
+        id: `game-time-${Date.now()}`, // Temporary ID until we get it from the backend
+        name: 'Game Time',
+        price: 1,
+        quantity: 1,
+        days: days
+      });
+
+      toast.success(`Added ${days} days to cart`, { id: loadingToast });
+    } catch {
+      toast.error('Failed to add to cart', { id: loadingToast });
+    }
+  };
+
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   if (error) return <Alert severity="error" sx={{ mt: 4 }}>{error}</Alert>;
   if (!profile) return <Alert severity="info" sx={{ mt: 4 }}>No profile data available</Alert>;
 
   return (
     <Box>
+      <CartDrawer />
       <Typography variant="h4" sx={{ mb: 4 }}>Profile</Typography>
       
-      {/* License Information Card */}
+      {/* License Information Card with integrated AddTime */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>License Information</Typography>
         {profile?.license ? (
           <>
             <Typography>License Key: {profile.license.key}</Typography>
-            <Typography>
+            <Typography sx={{ mb: 3 }}>
               Time Remaining: {formatTimeBalance(profile.license.timeBalance)}
             </Typography>
-            <Button 
-              variant="contained" 
-              color="primary"
-              sx={{ mt: 2 }}
-              onClick={() => router.push('/shop')}
-            >
-              Add More Time
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                type="number"
+                label="Number of Days"
+                value={days}
+                onChange={(e) => setDays(Math.max(1, parseInt(e.target.value) || 0))}
+                InputProps={{ inputProps: { min: 1 } }}
+                size="small"
+              />
+              <Button 
+                variant="contained" 
+                onClick={handleAddToCart}
+                sx={{ minWidth: '120px' }}
+              >
+                Add to Cart (${days})
+              </Button>
+            </Box>
           </>
         ) : (
           <Alert severity="warning">
