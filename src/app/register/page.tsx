@@ -70,8 +70,9 @@ export default function Register() {
         const data = await res.json();
         toast.error(data.error || 'Registration failed', { id: loadingToast });
       }
-    } catch (error) {
-      toast.error('Connection error', { id: loadingToast });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+      toast.error(errorMessage, { id: loadingToast });
     }
   };
 

@@ -2,6 +2,7 @@
 
 import { Box } from '@mui/material';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface LogoProps {
   isDarkMode: boolean;
@@ -23,12 +24,11 @@ const Logo: React.FC<LogoProps> = ({ isDarkMode }) => {
       }}
     >
       {!imageError ? (
-        <img
+        <Image
           src={isDarkMode ? '/logoWhite2.png' : '/logoBlack2.png'}
           alt="EZWoW Logo"
+          fill
           style={{ 
-            maxWidth: '100%',
-            height: '100%',
             objectFit: 'contain',
           }}
           onError={() => {

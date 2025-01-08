@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { 
   Box, 
@@ -13,7 +14,6 @@ import {
   Divider
 } from '@mui/material';
 import toast from 'react-hot-toast';
-import { formatDistance } from 'date-fns';
 
 interface UserProfile {
   email: string;
@@ -21,7 +21,7 @@ interface UserProfile {
   createdAt: string;
   license: {
     key: string;
-    expiresAt: string;
+    timeBalance: number;  // Changed from expiresAt to timeBalance
   } | null;
 }
 
@@ -49,6 +49,7 @@ function formatTimeBalance(seconds: number): string {
 }
 
 export default function Profile() {
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

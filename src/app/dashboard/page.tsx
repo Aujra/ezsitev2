@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { JSX, useState } from 'react';
 import {
   Box,
   Typography,
   IconButton,
-  Button,
   Drawer,
   List,
   ListItem,
@@ -17,9 +16,7 @@ import {
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import MenuIcon from '@mui/icons-material/Menu';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ShopIcon from '@mui/icons-material/Shop';
@@ -53,8 +50,9 @@ export default function Dashboard() {
       await fetch('/api/auth/logout', { method: 'POST' });
       toast.success('Logged out successfully', { id: loadingToast });
       router.push('/login');
-    } catch (error) {
-      toast.error('Error logging out', { id: loadingToast });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error logging out';
+      toast.error(errorMessage, { id: loadingToast });
     }
   };
 
@@ -86,7 +84,10 @@ export default function Dashboard() {
       <Divider />
       <List>
         <ListItem>
-          <ListItemButton onClick={toggleTheme}>
+          <ListItemButton 
+            onClick={toggleTheme}
+            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
             <ListItemIcon>
               {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
             </ListItemIcon>
@@ -99,6 +100,14 @@ export default function Dashboard() {
               <AdminPanelSettingsIcon />
             </ListItemIcon>
             <ListItemText primary="Go to Admin Dashboard" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
           </ListItemButton>
         </ListItem>
       </List>

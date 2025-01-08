@@ -4,6 +4,12 @@ import jwt from 'jsonwebtoken';
 import { hash, compare } from 'bcryptjs';
 import prisma from '@lib/prisma';
 
+interface ProfileUpdateData {
+  email: string;
+  discordId: string | null;
+  password?: string;
+}
+
 export async function GET() {
   try {
     const cookieStore = await cookies();
@@ -34,7 +40,7 @@ export async function GET() {
 
     return NextResponse.json(user);
   } catch (error) {
-    console.log(error.stack);
+    console.log(error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -65,7 +71,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const updateData: any = {
+    const updateData: ProfileUpdateData = {
       email,
       discordId,
     };

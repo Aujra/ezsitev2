@@ -34,10 +34,8 @@ export async function middleware(request: NextRequest) {
 
   try {
     await verifyToken(token);
-    console.log('✅ Token verified');
     return NextResponse.next();
-  } catch (error) {
-    console.log('❌ Invalid token');
+  } catch {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }

@@ -7,7 +7,6 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import Logo from '../components/Logo';
 import toast from 'react-hot-toast';
 
@@ -62,8 +61,9 @@ export default function Login() {
         const data = await res.json();
         toast.error(data.error || 'Login failed', { id: loadingToast });
       }
-    } catch (error) {
-      toast.error('Connection error', { id: loadingToast });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+      toast.error(errorMessage, { id: loadingToast });
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +93,7 @@ export default function Login() {
         <Logo isDarkMode={isDarkMode} />
 
         <IconButton 
+        aria-label = {isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
           sx={{ 
             position: 'absolute',
             top: 16,

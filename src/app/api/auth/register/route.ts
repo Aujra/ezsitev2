@@ -33,10 +33,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      licenseKey: user.license.key 
+      licenseKey: user.license?.key ?? '' 
     });
   } catch (error) {
-    console.log(error.stack);
+    console.log(error);
     return NextResponse.json({ error: 'Registration failed' }, { status: 400 });
   }
 }
