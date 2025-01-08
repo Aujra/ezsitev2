@@ -2,18 +2,16 @@
 
 import { Drawer, IconButton, Badge } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { useState } from 'react';
 import MiniCart from '@/components/MiniCart';
 import { useCart } from '@/context/CartContext';
 
-const CartDrawer = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { items } = useCart();
+export default function CartDrawer() {
+  const { items, isOpen, openCart, closeCart } = useCart();
 
   return (
     <>
       <IconButton 
-        onClick={() => setIsOpen(true)}
+        onClick={openCart}
         aria-label="Shopping cart"
         sx={{ position: 'fixed', bottom: 16, right: 16 }}
       >
@@ -25,7 +23,7 @@ const CartDrawer = () => {
       <Drawer
         anchor="right"
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={closeCart}
         PaperProps={{
           sx: { width: { xs: '100%', sm: 400 } }
         }}
@@ -34,6 +32,4 @@ const CartDrawer = () => {
       </Drawer>
     </>
   );
-};
-
-export default CartDrawer;
+}

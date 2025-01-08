@@ -129,29 +129,14 @@ export default function Profile() {
     }
 
     const loadingToast = toast.loading('Adding to cart...');
-    try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'game-time',
-          name: 'Game Time',
-          price: 1, // $1 per day
-          quantity: 1,
-          days: days
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add to cart');
-      }
-
+    try {     
       addItem({
-        id: `game-time-${Date.now()}`, // Temporary ID until we get it from the backend
-        name: 'Game Time',
-        price: 1,
+        id: `game-time-${Date.now()}`,
+        name: `${days} Days Game Time`,
+        price: Math.pow(days, 2), // Square the days for price
         quantity: 1,
-        days: days
+        days: days,
+        type: 'game-time',
       });
 
       toast.success(`Added ${days} days to cart`, { id: loadingToast });
@@ -166,7 +151,6 @@ export default function Profile() {
 
   return (
     <Box>
-      <CartDrawer />
       <Typography variant="h4" sx={{ mb: 4 }}>Profile</Typography>
       
       {/* License Information Card with integrated AddTime */}

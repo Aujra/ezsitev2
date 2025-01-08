@@ -25,6 +25,7 @@ import { useAppTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Profile from '@/components/Profile';
+import CartDrawer from '@/components/CartDrawer';
 
 const DRAWER_WIDTH = 240;
 
@@ -134,6 +135,7 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <CartDrawer />
       <Box
         component="nav"
         sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}

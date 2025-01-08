@@ -51,7 +51,7 @@ const MiniCart = () => {
               <Box>
                 <Typography variant="subtitle1">{item.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {item.days} days - ${item.price * item.days!}
+                  {item.days} days - ${item.price}
                 </Typography>
               </Box>
               <IconButton 
