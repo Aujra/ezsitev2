@@ -24,6 +24,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useAppTheme } from '../theme/ThemeContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import Profile from './components/Profile';
 
 const DRAWER_WIDTH = 240;
 
@@ -98,6 +99,24 @@ export default function Dashboard() {
     </Box>
   );
 
+  const renderContent = () => {
+    switch (selectedItem) {
+      case 'Profile':
+        return <Profile />;
+      default:
+        return (
+          <>
+            <Typography variant="h4" sx={{ mb: 4 }}>
+              {selectedItem}
+            </Typography>
+            <Typography paragraph>
+              Welcome to your dashboard! Select an option from the menu to get started.
+            </Typography>
+          </>
+        );
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Box
@@ -153,13 +172,7 @@ export default function Dashboard() {
             <MenuIcon />
           </IconButton>
         </Box>
-        {/* Main content goes here */}
-        <Typography variant="h4" sx={{ mb: 4 }}>
-          {selectedItem}
-        </Typography>
-        <Typography paragraph>
-          Welcome to your dashboard! Select an option from the menu to get started.
-        </Typography>
+        {renderContent()}
       </Box>
     </Box>
   );
