@@ -21,10 +21,10 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ShopIcon from '@mui/icons-material/Shop';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { useAppTheme } from '../theme/ThemeContext';
+import { useAppTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import Profile from './components/Profile';
+import Profile from '@/components/Profile';
 
 const DRAWER_WIDTH = 240;
 

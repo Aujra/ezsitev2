@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Button, TextField, Box, Typography, Container, IconButton, Paper } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useAppTheme } from '../theme/ThemeContext';
+import { useAppTheme } from '../../context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Logo from '../components/Logo';
+import Logo from '@/components/Logo';
 import toast from 'react-hot-toast';
 
 export default function Register() {

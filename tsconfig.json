@@ -30,6 +30,12 @@
       ],
       "@lib/*": [
         "./src/lib/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/context/*": [
+        "./src/context/*"
       ]
     }
   },

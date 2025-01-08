@@ -2,7 +2,7 @@
 
 import { Box, Typography, IconButton, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useCart } from '../../../context/CartContext';
+import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 const MiniCart = () => {

@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import toast from 'react-hot-toast';
 import CartDrawer from './CartDrawer';
-import { useCart } from '../../../context/CartContext';
+import { useCart } from '../context/CartContext';
 
 interface UserProfile {
   email: string;

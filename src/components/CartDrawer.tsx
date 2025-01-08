@@ -3,8 +3,8 @@
 import { Drawer, IconButton, Badge } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useState } from 'react';
-import MiniCart from './MiniCart';
-import { useCart } from '../../../context/CartContext';
+import MiniCart from '@/components/MiniCart';
+import { useCart } from '@/context/CartContext';
 
 const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);

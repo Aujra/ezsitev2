@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeWrapper } from './theme/ThemeContext';
+import { ThemeWrapper } from '@/context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { poppins } from './theme/fonts';
-import { CartProvider } from './context/CartContext';
+import { CartProvider } from '../context/CartContext';
 
 export const metadata: Metadata = {
   title: "Create Next App",
