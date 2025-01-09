@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||      // Next.js assets
     pathname === '/login' ||              // Auth pages
     pathname === '/register' ||
+    pathname.startsWith('/checkout/success') || // Allow checkout success page
     pathname.includes('.') ||             // Static files
     pathname === '/favicon.ico';
 

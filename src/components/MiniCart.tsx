@@ -11,17 +11,28 @@ const MiniCart = () => {
   const handleCheckout = async () => {
     const loadingToast = toast.loading('Processing checkout...');
     try {
-      const response = await fetch('/api/cart/checkout', {
+      const response = await fetch('/api/checkout/create', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            name: item.name,
+            days: item.days,
+            price: item.price,
+          }))
+        }),
       });
 
       if (!response.ok) {
         throw new Error('Checkout failed');
       }
 
-      clearCart();
-      toast.success('Checkout successful', { id: loadingToast });
-    } catch {
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Checkout error:', error);
       toast.error('Failed to process checkout', { id: loadingToast });
     }
   };

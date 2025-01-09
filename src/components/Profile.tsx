@@ -34,21 +34,6 @@ interface EditableProfile {
   confirmPassword: string;
 }
 
-function formatTimeBalance(seconds: number): string {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-
-  const parts = [];
-  if (days > 0) parts.push(`${days}d`);
-  if (hours > 0) parts.push(`${hours}h`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  if (remainingSeconds > 0) parts.push(`${remainingSeconds}s`);
-
-  return parts.length > 0 ? parts.join(' ') : '0s';
-}
-
 export default function Profile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +133,23 @@ export default function Profile() {
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   if (error) return <Alert severity="error" sx={{ mt: 4 }}>{error}</Alert>;
   if (!profile) return <Alert severity="info" sx={{ mt: 4 }}>No profile data available</Alert>;
+
+  function formatTimeBalance(seconds: number): string {
+    const days = Math.floor(seconds / (24 * 60 * 60));
+    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((seconds % (60 * 60)) / 60);
+    const remainingSeconds = seconds % 60;
+  
+    const parts = [
+      `${days} days`,
+      `${hours} hours`,
+      `${minutes} minutes`,
+      `${remainingSeconds} seconds`
+    ];
+  
+    return parts.join(' ');
+  }
+  
 
   return (
     <Box>

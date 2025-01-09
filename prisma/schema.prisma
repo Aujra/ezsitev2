@@ -22,6 +22,7 @@ model User {
   updatedAt DateTime @updatedAt
   license   License?
   cart      Cart?
+  orders    Order[]
 }
 
 model License {
@@ -58,4 +59,19 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@index([cartId])
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  status    String   @default("pending") // pending, completed, failed
+  days      Int
+  seconds   Int
+  stripeId  String   // Removed @unique constraint
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
