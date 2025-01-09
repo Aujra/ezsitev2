@@ -6,15 +6,16 @@ import Image from 'next/image';
 
 interface LogoProps {
   isDarkMode: boolean;
+  margin?: string | number;
 }
 
-const Logo: React.FC<LogoProps> = ({ isDarkMode }) => {
+const Logo: React.FC<LogoProps> = ({ isDarkMode, margin = 2 }) => {
   const [imageError, setImageError] = useState(false);
 
   return (
     <Box 
       sx={{ 
-        mb: 4, 
+        m: margin,
         position: 'relative',
         width: '180px',
         height: '60px',

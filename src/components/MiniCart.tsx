@@ -2,11 +2,12 @@
 
 import { Box, Typography, IconButton, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 const MiniCart = () => {
-  const { items, removeItem, total, clearCart } = useCart();
+  const { items, removeItem, total, closeCart } = useCart();
 
   const handleCheckout = async () => {
     const loadingToast = toast.loading('Processing checkout...');
@@ -39,7 +40,12 @@ const MiniCart = () => {
 
   return (
     <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h6" sx={{ mb: 3 }}>Shopping Cart</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h6">Shopping Cart</Typography>
+        <IconButton onClick={closeCart} aria-label="Close cart">
+          <CloseIcon />
+        </IconButton>
+      </Box>
       
       <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
         {items.length === 0 ? (

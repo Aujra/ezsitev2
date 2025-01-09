@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[CONFIRM_ERROR]', error.stack);
+    console.error('[CONFIRM_ERROR]', error);
     return new NextResponse('Internal Error', { status: 500 });
   }
 }

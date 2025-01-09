@@ -26,6 +26,8 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Profile from '@/components/Profile';
 import CartDrawer from '@/components/CartDrawer';
+import Orders from '@/components/Orders';
+import Logo from '@/components/Logo';
 
 const DRAWER_WIDTH = 240;
 
@@ -65,6 +67,10 @@ export default function Dashboard() {
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+        <Logo isDarkMode={isDarkMode} margin={0} />
+      </Box>
+      <Divider sx={{ my: 1 }} />
       <List>
         {navItems.map((item) => (
           <ListItem key={item.text} disablePadding>
@@ -119,6 +125,8 @@ export default function Dashboard() {
     switch (selectedItem) {
       case 'Profile':
         return <Profile />;
+      case 'Orders':
+        return <Orders />;
       default:
         return (
           <>

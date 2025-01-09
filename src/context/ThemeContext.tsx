@@ -118,6 +118,25 @@ const lightTheme = createTheme({
         },
       },
     },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+        },
+        colorPrimary: {
+          backgroundColor: '#60a5fa',
+          color: '#ffffff',
+        },
+        colorWarning: {
+          backgroundColor: '#fbbf24',
+          color: '#ffffff',
+        },
+        colorError: {
+          backgroundColor: '#ef4444',
+          color: '#ffffff',
+        },
+      },
+    },
   },
 });
 
@@ -208,6 +227,25 @@ const darkTheme = createTheme({
           backgroundColor: '#1e293b',
           borderRadius: '16px',
           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3)',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+        },
+        colorPrimary: {
+          backgroundColor: '#3b82f6',
+          color: '#ffffff',
+        },
+        colorWarning: {
+          backgroundColor: '#d97706',
+          color: '#ffffff',
+        },
+        colorError: {
+          backgroundColor: '#dc2626',
+          color: '#ffffff',
         },
       },
     },

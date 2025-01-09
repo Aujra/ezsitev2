@@ -90,7 +90,7 @@ export default function Login() {
             : '0 4px 20px 0 rgba(0,0,0,0.1)',
         }}
       >
-        <Logo isDarkMode={isDarkMode} />
+        <Logo isDarkMode={isDarkMode} margin={2} />
 
         <IconButton 
         aria-label = {isDarkMode ? "Switch to light mode" : "Switch to dark mode"}

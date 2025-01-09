@@ -1,4 +1,3 @@
-import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
