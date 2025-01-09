@@ -21,6 +21,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ShopIcon from '@mui/icons-material/Shop';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { useAppTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -28,6 +29,7 @@ import Profile from '@/components/Profile';
 import CartDrawer from '@/components/CartDrawer';
 import Orders from '@/components/Orders';
 import Logo from '@/components/Logo';
+import RotationBuilder from '@/components/RotationBuilder';
 
 const DRAWER_WIDTH = 240;
 
@@ -63,6 +65,7 @@ export default function Dashboard() {
     { text: 'Profile', icon: <PersonIcon /> },
     { text: 'Shop', icon: <ShopIcon /> },
     { text: 'Orders', icon: <ShoppingCartIcon /> },
+    { text: 'Rotation Builder', icon: <AutoFixHighIcon /> },
   ];
 
   const drawer = (
@@ -127,6 +130,8 @@ export default function Dashboard() {
         return <Profile />;
       case 'Orders':
         return <Orders />;
+      case 'Rotation Builder':
+        return <RotationBuilder />;
       default:
         return (
           <>
