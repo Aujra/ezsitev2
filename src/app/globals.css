@@ -40,3 +40,24 @@ a {
     color-scheme: dark;
   }
 }
+
+@keyframes holographic {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes buttonGlow {
+  from {
+    box-shadow: 0 0 10px #ff71ce, 0 0 20px #01cdfe;
+  }
+  to {
+    box-shadow: 0 0 20px #ff71ce, 0 0 40px #01cdfe;
+  }
+}

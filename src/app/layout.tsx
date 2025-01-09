@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeWrapper } from '@/context/ThemeContext';
+import { ThemeSelector } from '@/components/ThemeSelector';
 import { Toaster } from 'react-hot-toast';
 import { poppins } from './theme/fonts';
 import { CartProvider } from '../context/CartContext';
@@ -20,6 +21,9 @@ export default function RootLayout({
       <body>
         <ThemeWrapper>
           <CartProvider>
+            <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1100 }}>
+              <ThemeSelector />
+            </div>
             {children}
             <Toaster position="top-right" toastOptions={{
               duration: 4000,
