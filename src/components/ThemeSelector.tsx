@@ -1,13 +1,13 @@
 'use client';
 
 import { Select, MenuItem, FormControl, SelectChangeEvent } from '@mui/material';
-import { useAppTheme } from '@/context/ThemeContext';
+import { useAppTheme, ThemeName } from '@/context/ThemeContext';
 
 export function ThemeSelector() {
   const { currentTheme, setTheme, availableThemes } = useAppTheme();
 
   const handleChange = (event: SelectChangeEvent) => {
-    setTheme(event.target.value as any);
+    setTheme(event.target.value as ThemeName);
   };
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, Theme } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 const themes = {
@@ -1041,12 +1041,16 @@ interface ThemeContextType {
   currentTheme: ThemeName;
   setTheme: (theme: ThemeName) => void;
   availableThemes: ThemeName[];
+  isDarkMode: boolean;
+  toggleTheme: () => void;
 }
 
 export const ThemeContext = createContext<ThemeContextType>({
   currentTheme: 'light',
   setTheme: () => {},
   availableThemes: [],
+  isDarkMode: false,
+  toggleTheme: () => {},
 });
 
 export const useAppTheme = () => {
@@ -1059,6 +1063,12 @@ export const useAppTheme = () => {
 
 export function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const [currentTheme, setCurrentTheme] = useState<ThemeName>('light');
+
+  const isDarkMode = themes[currentTheme].palette.mode === 'dark';
+
+  const toggleTheme = () => {
+    setTheme(isDarkMode ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as ThemeName;
@@ -1076,7 +1086,9 @@ export function ThemeWrapper({ children }: { children: React.ReactNode }) {
     <ThemeContext.Provider value={{ 
       currentTheme, 
       setTheme, 
-      availableThemes: Object.keys(themes) as ThemeName[] 
+      availableThemes: Object.keys(themes) as ThemeName[],
+      isDarkMode,
+      toggleTheme
     }}>
       <ThemeProvider theme={themes[currentTheme]}>
         <CssBaseline />
