@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(rotation);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to save rotation' },
       { status: 401 }
@@ -60,7 +60,7 @@ export async function GET() {
     });
 
     return NextResponse.json(rotations);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch rotations' },
       { status: 401 }

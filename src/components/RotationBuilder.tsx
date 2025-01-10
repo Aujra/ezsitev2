@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import {
   Box,
   Typography,
@@ -25,6 +26,17 @@ import ActionModal from './RotationBuilder/ActionModal';
 import { RotationAction } from '@/types/rotation';
 import { renderConditionText } from './RotationBuilder/ActionModal/helpers';
 
+interface SavedRotation {
+  id: string;
+  name: string;
+  data: {
+    actions: RotationAction[];
+  };
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function RotationBuilder() {
   const [actions, setActions] = useState<RotationAction[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -35,7 +47,7 @@ export default function RotationBuilder() {
     message: '',
     severity: 'success'
   });
-  const [savedRotations, setSavedRotations] = useState([]);
+  const [savedRotations, setSavedRotations] = useState<SavedRotation[]>([]);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
@@ -48,7 +60,7 @@ export default function RotationBuilder() {
       if (!response.ok) throw new Error('Failed to fetch rotations');
       const data = await response.json();
       setSavedRotations(data);
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Failed to fetch rotations',
@@ -56,8 +68,6 @@ export default function RotationBuilder() {
       });
     }
   };
-
-  const sortedActions = [...actions].sort((a, b) => b.weight - a.weight);
 
   const handleAddAction = (action: RotationAction) => {
     console.log('action', action);
@@ -115,7 +125,7 @@ export default function RotationBuilder() {
         message: 'Rotation saved successfully!',
         severity: 'success'
       });
-    } catch (error) {
+    } catch {
       setSnackbar({
         open: true,
         message: 'Failed to save rotation',
@@ -124,7 +134,7 @@ export default function RotationBuilder() {
     }
   };
 
-  const handleLoadRotation = (rotation: any) => {
+  const handleLoadRotation = (rotation: SavedRotation) => {
     setRotationName(rotation.name);
     setActions(rotation.data.actions);
     setMenuAnchor(null);
@@ -134,6 +144,24 @@ export default function RotationBuilder() {
       severity: 'success'
     });
   };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(actions);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Recalculate weights with 50-point separation
+    const updatedItems = items.map((item, index) => ({
+      ...item,
+      weight: (items.length - index) * 50
+    }));
+
+    setActions(updatedItems);
+  };
+
+  const sortedActions = actions;
 
   return (
     <Box>
@@ -181,7 +209,7 @@ export default function RotationBuilder() {
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
       >
-        {savedRotations.map((rotation: any) => (
+        {savedRotations.map((rotation: SavedRotation) => (
           <MenuItem 
             key={rotation.id} 
             onClick={() => handleLoadRotation(rotation)}
@@ -194,51 +222,77 @@ export default function RotationBuilder() {
         )}
       </Menu>
 
-      <List component={Paper} sx={{ minHeight: 200 }}>
-        {sortedActions.map((action) => (
-          <ListItem
-            key={action.id}
-            secondaryAction={
-              <Box>
-                <IconButton edge="end" onClick={() => handleEditAction(action)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction(action.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            }
-          >
-            <ListItemText
-              primary={`${action.spellName} → ${action.target} (Weight: ${action.weight})`}
-              secondary={
-                <>
-                  Priority: {action.priority} | Weight: {action.weight}
-                  {action.interruptible && ' | Interruptible'}
-                  <br />
-                  <Typography 
-                    component="div" 
-                    sx={{ 
-                      mt: 1,
-                      '& .operator': {
-                        color: 'primary.main',
-                        fontWeight: 'bold',
-                        mx: 0.5
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="actions">
+          {(provided) => (
+            <List 
+              component={Paper} 
+              sx={{ minHeight: 200 }}
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {sortedActions.map((action, index) => (
+                <Draggable 
+                  key={action.id} 
+                  draggableId={action.id} 
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <ListItem
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      sx={{
+                        ...provided.draggableProps.style,
+                        background: snapshot.isDragging ? 'rgba(0, 0, 0, 0.1)' : 'inherit',
+                      }}
+                      secondaryAction={
+                        <Box>
+                          <IconButton edge="end" onClick={() => handleEditAction(action)}>
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton edge="end" onClick={() => handleDeleteAction(action.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
                       }
-                    }}
-                  >
-                    Conditions: {
-                      action.conditions.groups.length === 0 
-                        ? 'None'
-                        : renderConditionText(action.conditions)
-                    }
-                  </Typography>
-                </>
-              }
-            />
-          </ListItem>
-        ))}
-      </List>
+                    >
+                      <ListItemText
+                        primary={`${action.spellName} → ${action.target} (Weight: ${action.weight})`}
+                        secondary={
+                          <>
+                            Priority: {action.priority} | Weight: {action.weight}
+                            {action.interruptible && ' | Interruptible'}
+                            <br />
+                            <Typography 
+                              component="div" 
+                              sx={{ 
+                                mt: 1,
+                                '& .operator': {
+                                  color: 'primary.main',
+                                  fontWeight: 'bold',
+                                  mx: 0.5
+                                }
+                              }}
+                            >
+                              Conditions: {
+                                action.conditions.groups.length === 0 
+                                  ? 'None'
+                                  : renderConditionText(action.conditions)
+                              }
+                            </Typography>
+                          </>
+                        }
+                      />
+                    </ListItem>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </List>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       <ActionModal
         open={modalOpen}
