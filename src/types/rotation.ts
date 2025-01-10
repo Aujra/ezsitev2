@@ -1,11 +1,29 @@
+import { OPERATORS, TARGETS, RESOURCES } from "@/components/RotationBuilder/ActionModal/constants";
+
 export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks';
 export type Target = 'Self' | 'Target' | 'Focus' | 'Tank' | 'Party1' | 'Party2' | 'Party3' | 'Party4';
 export type Operator = '>' | '<' | '=' | '>=' | '<=';
 export type Resource = 'Mana' | 'Rage' | 'Energy' | 'Focus' | 'RunicPower';
 export type LogicalOperator = 'AND' | 'OR' | 'NOT';
 
+type ConditionKeys = keyof (HPCondition & AuraCondition & ResourceCondition & CooldownCondition & ChargesCondition & StacksCondition);
+
+type FieldOptionType = string | number | boolean;
+
 interface BaseCondition {
   type: ConditionType;
+}
+
+export interface FieldDefinition {
+  type: 'text' | 'number' | 'select' | 'switch';
+  label: string;
+  key: ConditionKeys;
+  options?: readonly (Target | Operator | Resource)[];
+  dependent?: {
+    key: ConditionKeys;
+    value: FieldOptionType;
+    show: boolean;
+  };
 }
 
 export interface HPCondition extends BaseCondition {
@@ -130,3 +148,48 @@ export function createRotationAction(
     priority
   };
 }
+
+export const CONDITION_FIELD_DEFINITIONS: Record<ConditionType, FieldDefinition[]> = {
+  HP: [
+    { type: 'select', label: 'Operator', key: 'operator', options: OPERATORS },
+    { type: 'number', label: 'Value', key: 'value' }
+  ],
+  Aura: [
+    { type: 'text', label: 'Aura Name', key: 'auraName' },
+    { type: 'select', label: 'Target', key: 'target', options: TARGETS },
+    { type: 'switch', label: 'Is Present', key: 'isPresent' },
+    { type: 'number', label: 'Stacks', key: 'stacks' }
+  ],
+  Resource: [
+    { type: 'select', label: 'Resource', key: 'resource', options: RESOURCES },
+    { type: 'select', label: 'Operator', key: 'operator', options: OPERATORS },
+    { type: 'number', label: 'Value', key: 'value' }
+  ],
+  Cooldown: [
+    { type: 'text', label: 'Spell Name', key: 'spellName' },
+    { type: 'switch', label: 'Is Ready', key: 'isReady' },
+    { 
+      type: 'select', 
+      label: 'Operator', 
+      key: 'operator', 
+      options: OPERATORS,
+      dependent: { key: 'isReady', value: false, show: true }
+    },
+    { 
+      type: 'number', 
+      label: 'Value (seconds)',
+      key: 'value',
+      dependent: { key: 'isReady', value: false, show: true }
+    }
+  ],
+  Charges: [
+    { type: 'text', label: 'Spell Name', key: 'spellName' },
+    { type: 'select', label: 'Operator', key: 'operator', options: OPERATORS },
+    { type: 'number', label: 'Value', key: 'value' }
+  ],
+  Stacks: [
+    { type: 'text', label: 'Aura Name', key: 'auraName' },
+    { type: 'select', label: 'Operator', key: 'operator', options: OPERATORS },
+    { type: 'number', label: 'Value', key: 'value' }
+  ]
+} as const;
