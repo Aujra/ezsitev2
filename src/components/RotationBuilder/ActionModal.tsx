@@ -17,13 +17,25 @@ import {
   MenuItem,
   IconButton
 } from '@mui/material';
-import { RotationAction, Condition, LogicalOperator, ConditionType } from '@/types/rotation';
+import { 
+  RotationAction, 
+  Condition, 
+  LogicalOperator, 
+  ConditionType, 
+  BaseConditions,
+  CompositeCondition 
+} from '@/types/rotation';
 import { ActionSettings } from './ActionModal/components/ActionSettings';
 import { ConditionFields } from './ActionModal/components/ConditionFields';
 import { createDefaultCondition, createDefaultAction } from './ActionModal/helpers';
 import { LOGICAL_OPERATORS, CONDITION_TYPES } from './ActionModal/constants';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+
+// Update type guard to be more specific
+function isBaseCondition(condition: Condition | CompositeCondition): condition is BaseConditions {
+  return 'type' in condition && condition.type !== 'Composite';
+}
 
 interface ActionModalProps {
   open: boolean;
@@ -40,47 +52,59 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
   }, [initialAction, open]);
 
   const handleConditionTypeChange = (index: number, type: ConditionType) => {
-    setAction(prev => ({
-      ...prev,
-      conditions: {
-        ...prev.conditions,
-        conditions: prev.conditions.conditions.map((c, i) => 
-          i === index ? createDefaultCondition(type) : c
-        )
-      }
-    }));
+    setAction(prev => {
+      const newConditions = [...prev.conditions.conditions];
+      newConditions[index] = createDefaultCondition(type);
+      return {
+        ...prev,
+        conditions: {
+          ...prev.conditions,
+          conditions: newConditions
+        }
+      };
+    });
   };
 
   const handleAddCondition = () => {
-    setAction(prev => ({
-      ...prev,
-      conditions: {
-        ...prev.conditions,
-        conditions: [...prev.conditions.conditions, createDefaultCondition('HP')]
-      }
-    }));
+    setAction(prev => {
+      const newConditions = [...prev.conditions.conditions, createDefaultCondition('HP')];
+      return {
+        ...prev,
+        conditions: {
+          ...prev.conditions,
+          conditions: newConditions
+        }
+      };
+    });
   };
 
   const handleRemoveCondition = (index: number) => {
-    setAction(prev => ({
-      ...prev,
-      conditions: {
-        ...prev.conditions,
-        conditions: prev.conditions.conditions.filter((_, i) => i !== index)
-      }
-    }));
+    setAction(prev => {
+      const newConditions = prev.conditions.conditions.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        conditions: {
+          ...prev.conditions,
+          conditions: newConditions
+        }
+      };
+    });
   };
 
   const handleConditionUpdate = (index: number, updates: Partial<Omit<Condition, 'type'>>) => {
-    setAction(prev => ({
-      ...prev,
-      conditions: {
-        ...prev.conditions,
-        conditions: prev.conditions.conditions.map((c, i) => 
-          i === index ? { ...c, ...updates } : c
-        )
-      }
-    }));
+    setAction(prev => {
+      const newConditions = prev.conditions.conditions.map((c, i) => {
+        if (i !== index) return c;
+        return { ...c, ...updates } as Condition;
+      });
+      return {
+        ...prev,
+        conditions: {
+          ...prev.conditions,
+          conditions: newConditions
+        }
+      };
+    });
   };
 
   return (
@@ -105,8 +129,7 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
                   onChange={e => setAction(prev => ({
                     ...prev,
                     conditions: { ...prev.conditions, operator: e.target.value as LogicalOperator }
-                  }))}
-                >
+                  }))}>
                   {LOGICAL_OPERATORS.map(op => (
                     <MenuItem key={op} value={op}>{op}</MenuItem>
                   ))}
@@ -115,8 +138,7 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
               <Button 
                 onClick={handleAddCondition} 
                 startIcon={<AddIcon />} 
-                variant="outlined"
-              >
+                variant="outlined">
                 Add Condition
               </Button>
             </Box>
@@ -136,25 +158,25 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
                       <FormControl sx={{ width: '200px' }}>
                         <InputLabel>Condition Type</InputLabel>
                         <Select
-                          value={condition.type}
+                          value={isBaseCondition(condition) ? condition.type : ''}
                           label="Condition Type"
-                          onChange={e => handleConditionTypeChange(index, e.target.value as ConditionType)}
-                        >
+                          onChange={e => handleConditionTypeChange(index, e.target.value as ConditionType)}>
                           {CONDITION_TYPES.map(type => (
                             <MenuItem key={type} value={type}>{type}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>
                       <Box sx={{ flex: 1 }}>
-                        <ConditionFields 
-                          condition={condition} 
-                          onUpdate={(updates) => handleConditionUpdate(index, updates)}
-                        />
+                        {isBaseCondition(condition) && (
+                          <ConditionFields 
+                            condition={condition} 
+                            onUpdate={(updates) => handleConditionUpdate(index, updates)}
+                          />
+                        )}
                       </Box>
                       <IconButton 
                         onClick={() => handleRemoveCondition(index)} 
-                        color="error"
-                      >
+                        color="error">
                         <DeleteIcon />
                       </IconButton>
                     </Box>

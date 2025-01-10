@@ -8,8 +8,10 @@ import {
   ResourceCondition,
   CooldownCondition,
   ChargesCondition,
-  StacksCondition
+  StacksCondition,
+  CompositeCondition
 } from '@/types/rotation';
+import crypto from 'crypto';
 
 export function createDefaultCondition(type: ConditionType): Condition {
   const baseCondition = { type };
@@ -69,11 +71,12 @@ export function createDefaultCondition(type: ConditionType): Condition {
 
 export function createDefaultAction(): RotationAction {
   return {
-    id: crypto.randomUUID(),
+    id: typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).substring(2),
     spellName: '',
     target: 'Target' as Target,
     weight: 1,
     conditions: {
+      type: 'Composite',
       operator: 'AND',
       conditions: []
     },
@@ -109,6 +112,7 @@ export function validateCondition(condition: Condition): boolean {
 }
 
 export function getConditionDescription(condition: Condition): string {
+  console.log('condition', condition);
   switch (condition.type) {
     case 'HP':
       return `HP ${condition.operator} ${condition.value}%`;
@@ -135,4 +139,23 @@ export function getConditionDescription(condition: Condition): string {
     default:
       return 'Invalid condition';
   }
+}
+
+export function renderConditionText(conditions: CompositeCondition): string {
+  if (!conditions.conditions.length) {
+    return 'None';
+  }
+
+  const conditionTexts = conditions.conditions.map(condition => {
+    if ('conditions' in condition && Array.isArray(condition.conditions)) {
+      // This is a nested CompositeCondition
+      return `(${renderConditionText(condition)})`;
+    } else {
+      // This is a single Condition
+      return getConditionDescription(condition as Condition);
+    }
+  });
+
+  // Join with the operator wrapped in brackets
+  return conditionTexts.join(` [${conditions.operator}] `);
 }

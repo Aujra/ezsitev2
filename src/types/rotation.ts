@@ -1,5 +1,6 @@
 import { OPERATORS, TARGETS, RESOURCES } from "@/components/RotationBuilder/ActionModal/constants";
 
+// Update ConditionType to exclude 'Composite'
 export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks';
 export type Target = 'Self' | 'Target' | 'Focus' | 'Tank' | 'Party1' | 'Party2' | 'Party3' | 'Party4';
 export type Operator = '>' | '<' | '=' | '>=' | '<=';
@@ -7,8 +8,6 @@ export type Resource = 'Mana' | 'Rage' | 'Energy' | 'Focus' | 'RunicPower';
 export type LogicalOperator = 'AND' | 'OR' | 'NOT';
 
 type ConditionKeys = keyof (HPCondition & AuraCondition & ResourceCondition & CooldownCondition & ChargesCondition & StacksCondition);
-
-type FieldOptionType = string | number | boolean;
 
 interface BaseCondition {
   type: ConditionType;
@@ -21,7 +20,7 @@ export interface FieldDefinition {
   options?: readonly (Target | Operator | Resource)[];
   dependent?: {
     key: ConditionKeys;
-    value: FieldOptionType;
+    value: boolean;  // Changed from 'FieldOptionType' to just 'boolean'
     show: boolean;
   };
 }
@@ -70,7 +69,8 @@ export interface StacksCondition extends BaseCondition {
   value: number;
 }
 
-export type Condition = 
+// Update Condition type to separate base conditions from composite
+export type BaseConditions = 
   | HPCondition 
   | AuraCondition 
   | ResourceCondition 
@@ -78,8 +78,11 @@ export type Condition =
   | ChargesCondition 
   | StacksCondition;
 
+export type Condition = BaseConditions | CompositeCondition;
+
 export interface CompositeCondition {
   operator: LogicalOperator;
+  type: 'Composite';
   conditions: (Condition | CompositeCondition)[];
 }
 

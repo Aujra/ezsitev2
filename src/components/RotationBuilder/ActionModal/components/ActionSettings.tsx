@@ -1,3 +1,5 @@
+'use client';
+
 import { Box, TextField, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Switch } from '@mui/material';
 import { RotationAction, Target } from '@/types/rotation';
 import { TARGETS } from '../constants';

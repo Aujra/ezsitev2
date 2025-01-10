@@ -1,15 +1,23 @@
+'use client';
+
 import { Box, FormControl, InputLabel, Select, MenuItem, TextField, FormControlLabel, Switch } from '@mui/material';
-import { Condition, FieldDefinition, CONDITION_FIELD_DEFINITIONS } from '@/types/rotation';
+import { BaseConditions, FieldDefinition, CONDITION_FIELD_DEFINITIONS } from '@/types/rotation';
 
 interface ConditionFieldsProps {
-  condition: Condition;
-  onUpdate: (updates: Partial<Omit<Condition, 'type'>>) => void;
+  condition: BaseConditions;
+  onUpdate: (updates: Partial<Omit<BaseConditions, 'type'>>) => void;
 }
 
 export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
   const renderField = (field: FieldDefinition) => {
-    if (field.dependent && condition[field.dependent.key] !== field.dependent.value) {
-      return null;
+    // Type-safe property access
+    const fieldValue = condition[field.key as keyof typeof condition];
+    
+    if (field.dependent) {
+      const dependentValue = condition[field.dependent.key as keyof typeof condition];
+      if (Boolean(dependentValue) !== field.dependent.value) {
+        return null;
+      }
     }
 
     switch (field.type) {
@@ -17,7 +25,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
         return (
           <TextField
             label={field.label}
-            value={condition[field.key] || ''}
+            value={String(fieldValue || '')}
             onChange={e => onUpdate({ [field.key]: e.target.value })}
             sx={{ width: '200px' }}
           />
@@ -27,7 +35,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
           <TextField
             label={field.label}
             type="number"
-            value={condition[field.key] || 0}
+            value={Number(fieldValue || 0)}
             onChange={e => onUpdate({ [field.key]: Number(e.target.value) })}
             sx={{ width: '100px' }}
           />
@@ -37,7 +45,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
           <FormControl sx={{ width: '150px' }}>
             <InputLabel>{field.label}</InputLabel>
             <Select
-              value={condition[field.key] || ''}
+              value={String(fieldValue || '')}
               label={field.label}
               onChange={e => onUpdate({ [field.key]: e.target.value })}
             >
@@ -52,7 +60,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
           <FormControlLabel
             control={
               <Switch
-                checked={!!condition[field.key]}
+                checked={Boolean(fieldValue)}
                 onChange={e => onUpdate({ [field.key]: e.target.checked })}
               />
             }
@@ -67,7 +75,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
   return (
     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
       {fields.map((field, index) => (
-        <Box key={`${field.key}-${index}`}>
+        <Box key={`${String(field.key)}-${index}`}>
           {renderField(field)}
         </Box>
       ))}

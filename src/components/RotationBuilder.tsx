@@ -15,7 +15,8 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ActionModal from './RotationBuilder/ActionModal';
-import { RotationAction, CompositeCondition } from '@/types/rotation';
+import { RotationAction } from '@/types/rotation';
+import { renderConditionText } from './RotationBuilder/ActionModal/helpers';
 
 export default function RotationBuilder() {
   const [actions, setActions] = useState<RotationAction[]>([]);
@@ -39,40 +40,6 @@ export default function RotationBuilder() {
 
   const handleDeleteAction = (id: string) => {
     setActions(prev => prev.filter(a => a.id !== id));
-  };
-
-  const renderConditionText = (conditions: CompositeCondition): string => {
-    if (!conditions || !conditions.conditions.length === 0) {
-      return 'No conditions';
-    }
-
-    const conditionTexts = conditions.conditions.map(condition => {
-      if ('conditions' in condition) {
-        return `(${renderConditionText(condition)})`;
-      }
-      
-      switch (condition.type) {
-        case 'HP':
-          return `HP ${condition.operator} ${condition.value}%`;
-        case 'Aura':
-          return `Aura "${condition.auraName}" ${condition.isPresent ? 'present' : 'not present'} on ${condition.target}`;
-        case 'Resource':
-          return `${condition.resource} ${condition.operator} ${condition.value}`;
-        case 'Cooldown':
-          return condition.isReady 
-            ? `${condition.spellName} is ready`
-            : `${condition.spellName} CD ${condition.operator} ${condition.value}s`;
-        case 'Charges':
-          return `${condition.spellName} charges ${condition.operator} ${condition.value}`;
-        case 'Stacks':
-          return `${condition.auraName} stacks ${condition.operator} ${condition.value}`;
-        default:
-          return 'Unknown condition';
-      }
-    });
-
-    // Make operator more prominent
-    return conditionTexts.join(` [${conditions.operator}] `);
   };
 
   return (
@@ -114,11 +81,23 @@ export default function RotationBuilder() {
                   Priority: {action.priority} | Weight: {action.weight}
                   {action.interruptible && ' | Interruptible'}
                   <br />
-                  <Typography component="span" sx={{ fontWeight: 'bold' }}>
-                    {action.conditions.operator}
+                  <Typography 
+                    component="div" 
+                    sx={{ 
+                      mt: 1,
+                      '& .operator': {
+                        color: 'primary.main',
+                        fontWeight: 'bold',
+                        mx: 0.5
+                      }
+                    }}
+                  >
+                    Conditions: {
+                      action.conditions.conditions.length === 0 
+                        ? 'None'
+                        : renderConditionText(action.conditions)
+                    }
                   </Typography>
-                  {' of conditions: '}
-                  {renderConditionText(action.conditions)}
                 </>
               }
             />
