@@ -209,3 +209,13 @@ export const CONDITION_FIELD_DEFINITIONS: Record<ConditionType, FieldDefinition[
     { type: 'number', label: 'Value', key: 'value' }
   ]
 } as const;
+
+// Add SavedRotation interface
+export interface SavedRotation {
+  id: string;
+  name: string;
+  actions: RotationAction[];
+  isActive?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}

@@ -1,23 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  CircularProgress, 
-  Chip,
+import {
+  Box,
+  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  useTheme,
-  useMediaQuery,
-  Stack,
+  Chip,
+  CircularProgress,
 } from '@mui/material';
-import toast from 'react-hot-toast';
+import { ChipProps } from '@mui/material';
 
 interface Order {
   id: string;
@@ -25,15 +22,13 @@ interface Order {
   status: string;
   days: number;
   seconds: number;
-  stripeId: string;
   createdAt: string;
 }
 
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -46,181 +41,72 @@ export default function Orders() {
       const data = await response.json();
       setOrders(data);
     } catch {
-      toast.error('Failed to load orders');
+      setError('Failed to load orders');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string): "primary" | "warning" | "error" | "default" => {
+  const getStatusColor = (status: string): ChipProps['color'] => {
     switch (status) {
-      case 'completed': return 'primary';  // Uses our theme's primary color
-      case 'pending': return 'warning';
-      case 'failed': return 'error';
-      default: return 'default';
+      case 'completed':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'failed':
+        return 'error';
+      default:
+        return 'default';
     }
   };
 
-  const formatTimeRemaining = (seconds: number): string => {
-    const days = Math.floor(seconds / (24 * 60 * 60));
-    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
-    const minutes = Math.floor((seconds % (60 * 60)) / 60);
-    
-    return `${days}d ${hours}h ${minutes}m`;
-  };
-
-  const renderMobileCards = () => (
-    <Stack spacing={2}>
-      {orders.map((order) => (
-        <Paper 
-          key={order.id} 
-          sx={{ 
-            p: 2,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Order ID
-            </Typography>
-            <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
-              {order.id}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Date
-            </Typography>
-            <Typography variant="body2">
-              {new Date(order.createdAt).toLocaleDateString()}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Status
-            </Typography>
-            <Chip
-              label={order.status.toUpperCase()}
-              color={getStatusColor(order.status)}
-              size="small"
-              sx={{
-                fontWeight: 500,
-                borderRadius: '6px',
-                '& .MuiChip-label': { px: 1 }
-              }}
-            />
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Time Remaining
-            </Typography>
-            <Typography variant="body2">
-              {formatTimeRemaining(order.seconds)}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Amount
-            </Typography>
-            <Typography variant="body2" fontWeight="bold">
-              ${order.amount.toFixed(2)}
-            </Typography>
-          </Box>
-        </Paper>
-      ))}
-    </Stack>
-  );
-
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Box sx={{ px: { xs: 1, sm: 0 } }}>
-      <Typography 
-        variant="h4" 
-        sx={{ 
-          mb: 4,
-          fontSize: { xs: '1.5rem', sm: '2.125rem' }
-        }}
-      >
-        Orders History
-      </Typography>
-      {orders.length === 0 ? (
-        <Typography>No orders found.</Typography>
-      ) : (
-        isMobile ? renderMobileCards() : (
-          <TableContainer 
-            component={Paper} 
-            sx={{ 
-              maxWidth: '100vw',
-              '.MuiTableCell-root': {
-                px: { xs: 1, sm: 2 },
-                py: { xs: 1, sm: 1.5 },
-                '&:last-child': {
-                  pr: { xs: 1, sm: 2 }
-                }
-              }
-            }}
-          >
-            <Table size="small" sx={{ minWidth: 650 }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Time</TableCell>
-                  <TableCell align="right">Amount</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell 
-                      component="th" 
-                      scope="row"
-                      sx={{ 
-                        maxWidth: { xs: '80px', sm: 'none' },
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}
-                    >
-                      {order.id}
-                    </TableCell>
-                    <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={order.status.toUpperCase()}
-                        color={getStatusColor(order.status)}
-                        size="small"
-                        sx={{
-                          fontWeight: 500,
-                          borderRadius: '6px',
-                          '& .MuiChip-label': {
-                            px: 1,
-                          }
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>{formatTimeRemaining(order.seconds)}</TableCell>
-                    <TableCell align="right">${order.amount.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )
-      )}
+    <Box>
+      <Typography variant="h4" sx={{ mb: 3 }}>Your Orders</Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Order ID</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Days</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>{order.id.slice(0, 8)}...</TableCell>
+                <TableCell>
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>${order.amount.toFixed(2)}</TableCell>
+                <TableCell>{order.days}</TableCell>
+                <TableCell>
+                  <Chip 
+                    label={order.status}
+                    color={getStatusColor(order.status)}
+                    size="small"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+            {orders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <Typography color="textSecondary">
+                    No orders found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 }

@@ -22,20 +22,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ActionModal from './RotationBuilder/ActionModal';
-import { RotationAction } from '@/types/rotation';
+import CreateProduct from './CreateProduct';
+import { RotationAction, SavedRotation } from '@/types/rotation';
 import { renderConditionText } from './RotationBuilder/ActionModal/helpers';
-
-interface SavedRotation {
-  id: string;
-  name: string;
-  data: {
-    actions: RotationAction[];
-  };
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export default function RotationBuilder() {
   const [actions, setActions] = useState<RotationAction[]>([]);
@@ -49,6 +40,8 @@ export default function RotationBuilder() {
   });
   const [savedRotations, setSavedRotations] = useState<SavedRotation[]>([]);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [createProductOpen, setCreateProductOpen] = useState(false);
+  const [selectedRotation, setSelectedRotation] = useState<SavedRotation | null>(null);
 
   useEffect(() => {
     fetchRotations();
@@ -136,7 +129,7 @@ export default function RotationBuilder() {
 
   const handleLoadRotation = (rotation: SavedRotation) => {
     setRotationName(rotation.name);
-    setActions(rotation.data.actions);
+    setActions(rotation.actions); // Changed from rotation.data.actions
     setMenuAnchor(null);
     setSnackbar({
       open: true,
@@ -159,6 +152,21 @@ export default function RotationBuilder() {
     }));
 
     setActions(updatedItems);
+  };
+
+  const handleCreateProduct = () => {
+    // Only allow creating product from saved rotation
+    const currentRotation = savedRotations.find(r => r.name === rotationName);
+    if (!currentRotation) {
+      setSnackbar({
+        open: true,
+        message: 'Please save your rotation first',
+        severity: 'error'
+      });
+      return;
+    }
+    setSelectedRotation(currentRotation);
+    setCreateProductOpen(true);
   };
 
   const sortedActions = actions;
@@ -201,6 +209,15 @@ export default function RotationBuilder() {
           onClick={(e) => setMenuAnchor(e.currentTarget)}
         >
           Load Rotation
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<ShoppingCartIcon />}
+          onClick={handleCreateProduct}
+          disabled={actions.length === 0}
+        >
+          Create Product
         </Button>
       </Box>
 
@@ -303,6 +320,17 @@ export default function RotationBuilder() {
         onSave={handleAddAction}
         initialAction={editingAction}
       />
+
+      {selectedRotation && (
+        <CreateProduct
+          open={createProductOpen}
+          onClose={() => {
+            setCreateProductOpen(false);
+            setSelectedRotation(null);
+          }}
+          rotation={selectedRotation}
+        />
+      )}
 
       <Snackbar
         open={snackbar.open}

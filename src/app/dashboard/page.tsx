@@ -30,6 +30,7 @@ import CartDrawer from '@/components/CartDrawer';
 import Orders from '@/components/Orders';
 import Logo from '@/components/Logo';
 import RotationBuilder from '@/components/RotationBuilder';
+import Shop from '@/components/Shop';
 
 const DRAWER_WIDTH = 240;
 
@@ -132,6 +133,8 @@ export default function Dashboard() {
         return <Orders />;
       case 'Rotation Builder':
         return <RotationBuilder />;
+      case 'Shop':
+        return <Shop />;
       default:
         return (
           <>
