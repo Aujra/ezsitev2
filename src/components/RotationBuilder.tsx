@@ -42,7 +42,7 @@ export default function RotationBuilder() {
   };
 
   const renderConditionText = (conditions: CompositeCondition): string => {
-    if (!conditions || !conditions.conditions) {
+    if (!conditions || !conditions.conditions.length === 0) {
       return 'No conditions';
     }
 
@@ -71,7 +71,8 @@ export default function RotationBuilder() {
       }
     });
 
-    return conditionTexts.join(` ${conditions.operator} `);
+    // Make operator more prominent
+    return conditionTexts.join(` [${conditions.operator}] `);
   };
 
   return (
@@ -113,7 +114,11 @@ export default function RotationBuilder() {
                   Priority: {action.priority} | Weight: {action.weight}
                   {action.interruptible && ' | Interruptible'}
                   <br />
-                  Conditions: {renderConditionText(action.conditions)}
+                  <Typography component="span" sx={{ fontWeight: 'bold' }}>
+                    {action.conditions.operator}
+                  </Typography>
+                  {' of conditions: '}
+                  {renderConditionText(action.conditions)}
                 </>
               }
             />

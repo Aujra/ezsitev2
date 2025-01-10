@@ -16,7 +16,9 @@ import {
   Switch,
   FormControlLabel,
   Box,
-  IconButton
+  IconButton,
+  Typography,
+  Paper
 } from '@mui/material';
 import { RotationAction, Target, ConditionType, Condition, Resource, CompositeCondition, LogicalOperator, Operator } from '@/types/rotation';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -94,8 +96,8 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
     switch (condition.type) {
       case 'HP':
         return (
-          <Stack spacing={2}>
-            <FormControl fullWidth>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl sx={{ width: '150px' }}>
               <InputLabel>Operator</InputLabel>
               <Select
                 value={condition.operator}
@@ -112,18 +114,20 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
               type="number"
               value={condition.value}
               onChange={e => updateCondition(index, { value: Number(e.target.value) })}
+              sx={{ width: '100px' }}
             />
-          </Stack>
+          </Box>
         );
       case 'Aura':
         return (
-          <Stack spacing={2}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
               label="Aura Name"
               value={condition.auraName}
               onChange={e => updateCondition(index, { auraName: e.target.value })}
+              sx={{ width: '200px' }}
             />
-            <FormControl fullWidth>
+            <FormControl sx={{ width: '150px' }}>
               <InputLabel>Target</InputLabel>
               <Select
                 value={condition.target}
@@ -144,12 +148,12 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
               }
               label="Is Present"
             />
-          </Stack>
+          </Box>
         );
       case 'Resource':
         return (
-          <Stack spacing={2}>
-            <FormControl fullWidth>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl sx={{ width: '150px' }}>
               <InputLabel>Resource</InputLabel>
               <Select
                 value={condition.resource}
@@ -161,7 +165,7 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
                 ))}
               </Select>
             </FormControl>
-            <FormControl fullWidth>
+            <FormControl sx={{ width: '150px' }}>
               <InputLabel>Operator</InputLabel>
               <Select
                 value={condition.operator}
@@ -178,16 +182,18 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
               type="number"
               value={condition.value}
               onChange={e => updateCondition(index, { value: Number(e.target.value) })}
+              sx={{ width: '100px' }}
             />
-          </Stack>
+          </Box>
         );
       case 'Cooldown':
         return (
-          <Stack spacing={2}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
               label="Spell Name"
               value={condition.spellName}
               onChange={e => updateCondition(index, { spellName: e.target.value })}
+              sx={{ width: '200px' }}
             />
             <FormControlLabel
               control={
@@ -200,7 +206,7 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
             />
             {!condition.isReady && (
               <>
-                <FormControl fullWidth>
+                <FormControl sx={{ width: '150px' }}>
                   <InputLabel>Operator</InputLabel>
                   <Select
                     value={condition.operator}
@@ -217,15 +223,16 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
                   type="number"
                   value={condition.value}
                   onChange={e => updateCondition(index, { value: Number(e.target.value) })}
+                  sx={{ width: '100px' }}
                 />
               </>
             )}
-          </Stack>
+          </Box>
         );
       case 'Charges':
       case 'Stacks':
         return (
-          <Stack spacing={2}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField
               label={condition.type === 'Charges' ? 'Spell Name' : 'Aura Name'}
               value={condition.type === 'Charges' ? condition.spellName : condition.auraName}
@@ -234,8 +241,9 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
                   ? { spellName: e.target.value }
                   : { auraName: e.target.value }
               )}
+              sx={{ width: '200px' }}
             />
-            <FormControl fullWidth>
+            <FormControl sx={{ width: '150px' }}>
               <InputLabel>Operator</InputLabel>
               <Select
                 value={condition.operator}
@@ -252,8 +260,9 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
               type="number"
               value={condition.value}
               onChange={e => updateCondition(index, { value: Number(e.target.value) })}
+              sx={{ width: '100px' }}
             />
-          </Stack>
+          </Box>
         );
     }
   };
@@ -310,85 +319,119 @@ export default function ActionModal({ open, onClose, onSave, initialAction }: Ac
       </DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Spell Name"
-            value={action.spellName}
-            onChange={e => setAction(prev => ({ ...prev, spellName: e.target.value }))}
-          />
-          <FormControl fullWidth>
-            <InputLabel>Target</InputLabel>
-            <Select
-              value={action.target}
-              label="Target"
-              onChange={e => setAction(prev => ({ ...prev, target: e.target.value as Target }))}
-            >
-              {TARGETS.map(target => (
-                <MenuItem key={target} value={target}>{target}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            label="Weight"
-            type="number"
-            value={action.weight}
-            onChange={e => setAction(prev => ({ ...prev, weight: Number(e.target.value) }))}
-          />
-          <FormControl fullWidth>
-            <InputLabel>Logical Operator</InputLabel>
-            <Select
-              value={action.conditions.operator}
-              label="Logical Operator"
-              onChange={e => setAction(prev => ({
-                ...prev,
-                conditions: { ...prev.conditions, operator: e.target.value as LogicalOperator }
-              }))}
-            >
-              {LOGICAL_OPERATORS.map(op => (
-                <MenuItem key={op} value={op}>{op}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {action.conditions.conditions.map((condition, index) => (
-            <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'start' }}>
-              <FormControl fullWidth>
-                <InputLabel>Condition Type</InputLabel>
+          {/* Main Action Settings */}
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
+            <TextField
+              label="Spell Name"
+              value={action.spellName}
+              onChange={e => setAction(prev => ({ ...prev, spellName: e.target.value }))}
+              sx={{ width: '300px' }}
+            />
+            <FormControl sx={{ width: '200px' }}>
+              <InputLabel>Target</InputLabel>
+              <Select
+                value={action.target}
+                label="Target"
+                onChange={e => setAction(prev => ({ ...prev, target: e.target.value as Target }))}
+              >
+                {TARGETS.map(target => (
+                  <MenuItem key={target} value={target}>{target}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Weight"
+              type="number"
+              value={action.weight}
+              onChange={e => setAction(prev => ({ ...prev, weight: Number(e.target.value) }))}
+              sx={{ width: '100px' }}
+            />
+            <TextField
+              label="Priority"
+              type="number"
+              value={action.priority}
+              onChange={e => setAction(prev => ({ ...prev, priority: Number(e.target.value) }))}
+              sx={{ width: '100px' }}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={action.interruptible}
+                  onChange={e => setAction(prev => ({ ...prev, interruptible: e.target.checked }))}
+                />
+              }
+              label="Interruptible"
+            />
+          </Box>
+
+          {/* Conditions Section */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>Conditions</Typography>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+              <FormControl sx={{ width: '200px' }}>
+                <InputLabel>Logical Operator</InputLabel>
                 <Select
-                  value={condition.type}
-                  label="Condition Type"
-                  onChange={e => handleConditionTypeChange(e.target.value as ConditionType, index)}
+                  value={action.conditions.operator}
+                  label="Logical Operator"
+                  onChange={e => setAction(prev => ({
+                    ...prev,
+                    conditions: { ...prev.conditions, operator: e.target.value as LogicalOperator }
+                  }))}
                 >
-                  {CONDITION_TYPES.map(type => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                  {LOGICAL_OPERATORS.map(op => (
+                    <MenuItem key={op} value={op}>{op}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
-              {renderConditionFields(condition, index)}
-              <IconButton onClick={() => removeCondition(index)} color="error">
-                <DeleteIcon />
-              </IconButton>
+              <Button onClick={addCondition} startIcon={<AddIcon />} variant="outlined">
+                Add Condition
+              </Button>
             </Box>
-          ))}
-          <Button onClick={addCondition} startIcon={<AddIcon />}>
-            Add Condition
-          </Button>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={action.interruptible}
-                onChange={e => setAction(prev => ({ ...prev, interruptible: e.target.checked }))}
-              />
-            }
-            label="Interruptible"
-          />
-          <TextField
-            fullWidth
-            label="Priority"
-            type="number"
-            value={action.priority}
-            onChange={e => setAction(prev => ({ ...prev, priority: Number(e.target.value) }))}
-          />
+
+            {/* Condition List */}
+            <Stack spacing={2}>
+              {action.conditions.conditions.map((condition, index) => (
+                <Box key={index}>
+                  {index > 0 && (
+                    <Box sx={{ 
+                      py: 1, 
+                      px: 2, 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      typography: 'subtitle1',
+                      fontWeight: 'bold',
+                      color: 'primary.main'
+                    }}>
+                      {action.conditions.operator}
+                    </Box>
+                  )}
+                  <Paper sx={{ p: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
+                      <FormControl sx={{ width: '200px' }}>
+                        <InputLabel>Condition Type</InputLabel>
+                        <Select
+                          value={condition.type}
+                          label="Condition Type"
+                          onChange={e => handleConditionTypeChange(e.target.value as ConditionType, index)}
+                        >
+                          {CONDITION_TYPES.map(type => (
+                            <MenuItem key={type} value={type}>{type}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <Box sx={{ flex: 1, display: 'flex', gap: 2, alignItems: 'start' }}>
+                        {renderConditionFields(condition, index)}
+                      </Box>
+                      <IconButton onClick={() => removeCondition(index)} color="error">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </Paper>
+                </Box>
+              ))}
+            </Stack>
+          </Box>
         </Stack>
       </DialogContent>
       <DialogActions>
