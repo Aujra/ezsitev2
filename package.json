@@ -18,6 +18,8 @@
     "@prisma/client": "^6.2.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
+    "@vercel/analytics": "^1.4.1",
+    "@vercel/speed-insights": "^1.1.0",
     "bcryptjs": "^2.4.3",
     "date-fns": "^4.1.0",
     "jose": "^5.9.6",

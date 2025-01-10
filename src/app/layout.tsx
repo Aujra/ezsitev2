@@ -5,6 +5,8 @@ import { ThemeSelector } from '@/components/ThemeSelector';
 import { Toaster } from 'react-hot-toast';
 import { poppins } from './theme/fonts';
 import { CartProvider } from '../context/CartContext';
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -46,6 +48,8 @@ export default function RootLayout({
             }} />
           </CartProvider>
         </ThemeWrapper>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
