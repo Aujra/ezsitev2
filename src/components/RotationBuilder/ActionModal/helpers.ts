@@ -11,7 +11,7 @@ import {
   StacksCondition,
   CompositeCondition
 } from '@/types/rotation';
-import crypto from 'crypto';
+import { generateId } from '@/lib/utils';
 
 export function createDefaultCondition(type: ConditionType): Condition {
   const baseCondition = { type };
@@ -71,7 +71,7 @@ export function createDefaultCondition(type: ConditionType): Condition {
 
 export function createDefaultAction(): RotationAction {
   return {
-    id: typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+    id: generateId(),
     spellName: '',
     target: 'Target' as Target,
     weight: 1,

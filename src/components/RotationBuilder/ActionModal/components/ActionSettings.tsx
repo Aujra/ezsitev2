@@ -11,14 +11,21 @@ interface ActionSettingsProps {
 
 export function ActionSettings({ action, onChange }: ActionSettingsProps) {
   return (
-    <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', md: 'row' },
+      gap: 2,
+      '& > *': { 
+        minWidth: { xs: '100%', md: 'auto' }
+      }
+    }}>
       <TextField
         label="Spell Name"
         value={action.spellName}
         onChange={e => onChange({ spellName: e.target.value })}
-        sx={{ width: '300px' }}
+        sx={{ flex: { md: 2 } }}
       />
-      <FormControl sx={{ width: '200px' }}>
+      <FormControl>
         <InputLabel>Target</InputLabel>
         <Select
           value={action.target}
@@ -30,20 +37,27 @@ export function ActionSettings({ action, onChange }: ActionSettingsProps) {
           ))}
         </Select>
       </FormControl>
-      <TextField
-        label="Weight"
-        type="number"
-        value={action.weight}
-        onChange={e => onChange({ weight: Number(e.target.value) })}
-        sx={{ width: '100px' }}
-      />
-      <TextField
-        label="Priority"
-        type="number"
-        value={action.priority}
-        onChange={e => onChange({ priority: Number(e.target.value) })}
-        sx={{ width: '100px' }}
-      />
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2,
+        flexDirection: { xs: 'row', md: 'row' },
+        flex: 1
+      }}>
+        <TextField
+          label="Weight"
+          type="number"
+          value={action.weight}
+          onChange={e => onChange({ weight: Number(e.target.value) })}
+          sx={{ flex: 1 }}
+        />
+        <TextField
+          label="Priority"
+          type="number"
+          value={action.priority}
+          onChange={e => onChange({ priority: Number(e.target.value) })}
+          sx={{ flex: 1 }}
+        />
+      </Box>
       <FormControlLabel
         control={
           <Switch
@@ -52,6 +66,7 @@ export function ActionSettings({ action, onChange }: ActionSettingsProps) {
           />
         }
         label="Interruptible"
+        sx={{ m: 0 }}
       />
     </Box>
   );

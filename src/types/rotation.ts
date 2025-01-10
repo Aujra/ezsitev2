@@ -1,4 +1,5 @@
 import { OPERATORS, TARGETS, RESOURCES } from "@/components/RotationBuilder/ActionModal/constants";
+import { generateId } from '@/lib/utils';
 
 // Update ConditionType to exclude 'Composite'
 export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks';
@@ -143,7 +144,7 @@ export function createRotationAction(
   target: Target = 'Target'
 ): RotationAction {
   return {
-    id: crypto.randomUUID(),
+    id: generateId(),
     spellName,
     target,
     weight: 1,

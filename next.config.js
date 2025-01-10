@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   swcMinify: true, // Enable SWC minification
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production', // Remove console.log in production

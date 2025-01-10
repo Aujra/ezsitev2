@@ -73,7 +73,15 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
   const fields = CONDITION_FIELD_DEFINITIONS[condition.type];
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', md: 'row' },
+      gap: 2,
+      alignItems: { xs: 'stretch', md: 'center' },
+      '& .MuiFormControl-root': {
+        minWidth: { xs: '100%', md: 'auto' }
+      }
+    }}>
       {fields.map((field, index) => (
         <Box key={`${String(field.key)}-${index}`}>
           {renderField(field)}
