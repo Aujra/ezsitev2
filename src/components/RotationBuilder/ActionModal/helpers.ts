@@ -77,8 +77,7 @@ export function createDefaultAction(): RotationAction {
     weight: 1,
     conditions: {
       type: 'Composite',
-      operator: 'AND',
-      conditions: []
+      groups: []
     },
     priority: 0,
     interruptible: false
@@ -141,21 +140,26 @@ export function getConditionDescription(condition: Condition): string {
   }
 }
 
-export function renderConditionText(conditions: CompositeCondition): string {
-  if (!conditions.conditions.length) {
+export function renderConditionText(conditions: CompositeCondition): string {  
+  if (!conditions.groups.length) {
+    console.groupEnd();
     return 'None';
   }
 
-  const conditionTexts = conditions.conditions.map(condition => {
-    if ('conditions' in condition && Array.isArray(condition.conditions)) {
-      // This is a nested CompositeCondition
-      return `(${renderConditionText(condition)})`;
-    } else {
-      // This is a single Condition
-      return getConditionDescription(condition as Condition);
+  const groupTexts = conditions.groups.map((group) => {
+    // When there's only one condition in the group, no need for parentheses
+    if (group.conditions.length === 1) {
+      return `${group.operator}(${getConditionDescription(group.conditions[0])})`;
     }
+
+    // For multiple conditions in a group, wrap them in parentheses
+    const conditionsText = group.conditions
+      .map(condition => getConditionDescription(condition))
+      .join(' AND ');
+
+    return `${group.operator}(${conditionsText})`;
   });
 
-  // Join with the operator wrapped in brackets
-  return conditionTexts.join(` [${conditions.operator}] `);
+  const result = groupTexts.join(' ');
+  return result;
 }

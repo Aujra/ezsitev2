@@ -81,10 +81,22 @@ export type BaseConditions =
 
 export type Condition = BaseConditions | CompositeCondition;
 
-export interface CompositeCondition {
+export interface ConditionGroup {
   operator: LogicalOperator;
+  conditions: BaseConditions[]; // Only allows base conditions, not composite ones
+}
+
+export interface CompositeCondition {
   type: 'Composite';
-  conditions: (Condition | CompositeCondition)[];
+  groups: ConditionGroup[];
+}
+
+// Add helper function for creating nested conditions
+export function createNestedCondition(): CompositeCondition {
+  return {
+    type: 'Composite',
+    groups: []
+  };
 }
 
 export interface RotationAction {

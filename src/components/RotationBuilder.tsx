@@ -26,6 +26,8 @@ export default function RotationBuilder() {
   const [editingAction, setEditingAction] = useState<RotationAction | undefined>();
 
   const handleAddAction = (action: RotationAction) => {
+    console.log('action', action);
+
     if (editingAction) {
       setActions(prev => prev.map(a => a.id === action.id ? action : a));
     } else {
@@ -95,7 +97,7 @@ export default function RotationBuilder() {
                     }}
                   >
                     Conditions: {
-                      action.conditions.conditions.length === 0 
+                      action.conditions.groups.length === 0 
                         ? 'None'
                         : renderConditionText(action.conditions)
                     }
