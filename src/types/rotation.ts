@@ -2,7 +2,7 @@ import { OPERATORS, TARGETS, RESOURCES } from "@/components/RotationBuilder/Acti
 import { generateId } from '@/lib/utils';
 
 // Update ConditionType to exclude 'Composite'
-export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks';
+export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks' | 'RecentlyCast' | 'TargetHP';
 export type Target = 'Self' | 'Target' | 'Focus' | 'Tank' | 'Party1' | 'Party2' | 'Party3' | 'Party4';
 export type Operator = '>' | '<' | '=' | '>=' | '<=';
 export type Resource = 'Mana' | 'Rage' | 'Energy' | 'Focus' | 'RunicPower';
@@ -70,6 +70,13 @@ export interface StacksCondition extends BaseCondition {
   value: number;
 }
 
+// Add TargetHP condition interface
+export interface TargetHPCondition extends BaseCondition {
+  type: 'TargetHP';
+  operator: Operator;
+  value: number; // percentage
+}
+
 // Update Condition type to separate base conditions from composite
 export type BaseConditions = 
   | HPCondition 
@@ -77,7 +84,8 @@ export type BaseConditions =
   | ResourceCondition 
   | CooldownCondition 
   | ChargesCondition 
-  | StacksCondition;
+  | StacksCondition
+  | TargetHPCondition;
 
 export type Condition = BaseConditions | CompositeCondition;
 
@@ -148,6 +156,52 @@ export const SPELL_CONDITIONS = {
   }
 } as const;
 
+// Add Fire Mage specific condition templates
+export const FIRE_MAGE_CONDITIONS = {
+  COMBUSTION_NOT_READY: {
+    operator: 'AND',
+    conditions: [
+      { type: 'Cooldown', spellName: 'Combustion', operator: '>', value: 45 }
+    ]
+  },
+  SHIFTING_POWER_CONDITIONS: {
+    operator: 'AND',
+    conditions: [
+      { type: 'Cooldown', spellName: 'Combustion', operator: '>', value: 0 },
+      { type: 'Aura', target: 'Self', auraName: 'Combustion', isPresent: false },
+      { type: 'Charges', spellName: 'Fire Blast', operator: '<', value: 3 }
+    ]
+  },
+  HOT_STREAK_CONDITION: {
+    operator: 'AND',
+    conditions: [
+      { type: 'Aura', target: 'Self', auraName: 'Hot Streak', isPresent: true }
+    ]
+  },
+  EXECUTE_SCORCH_CONDITION: {
+    operator: 'AND',
+    conditions: [
+      { type: 'TargetHP', operator: '<', value: 30 },
+      { type: 'Aura', target: 'Target', auraName: 'Improved Scorch', operator: '<=', value: 2 },
+      { type: 'Aura', target: 'Self', auraName: 'Hot Streak', isPresent: false }
+    ]
+  },
+  HEAT_SHIMMER_CONDITION: {
+    operator: 'AND',
+    conditions: [
+      { type: 'Aura', target: 'Self', auraName: 'Heat Shimmer', isPresent: true },
+      { type: 'Aura', target: 'Self', auraName: 'Hot Streak', isPresent: false }
+    ]
+  },
+  HEATING_UP_CONDITION: {
+    operator: 'AND',
+    conditions: [
+      { type: 'Aura', target: 'Self', auraName: 'Heating Up', isPresent: true },
+      { type: 'Aura', target: 'Self', auraName: 'Hot Streak', isPresent: false }
+    ]
+  }
+} as const;
+
 // Helper function to create rotation actions
 export function createRotationAction(
   spellName: string,
@@ -207,6 +261,10 @@ export const CONDITION_FIELD_DEFINITIONS: Record<ConditionType, FieldDefinition[
     { type: 'text', label: 'Aura Name', key: 'auraName' },
     { type: 'select', label: 'Operator', key: 'operator', options: OPERATORS },
     { type: 'number', label: 'Value', key: 'value' }
+  ],
+  TargetHP: [
+    { type: 'select', label: 'Operator', key: 'operator', options: OPERATORS },
+    { type: 'number', label: 'Value (%)', key: 'value' }
   ]
 } as const;
 
