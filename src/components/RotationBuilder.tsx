@@ -16,6 +16,8 @@ import {
   Alert,
   Menu,
   MenuItem,
+  CircularProgress,
+  Divider,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -23,6 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ActionModal from './RotationBuilder/ActionModal';
 import CreateProduct from './CreateProduct';
 import { RotationAction, SavedRotation } from '@/types/rotation';
@@ -42,6 +45,8 @@ export default function RotationBuilder() {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [createProductOpen, setCreateProductOpen] = useState(false);
   const [selectedRotation, setSelectedRotation] = useState<SavedRotation | null>(null);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   useEffect(() => {
     fetchRotations();
@@ -64,8 +69,6 @@ export default function RotationBuilder() {
   };
 
   const handleAddAction = (action: RotationAction) => {
-    console.log('action', action);
-
     if (editingAction) {
       setActions(prev => prev.map(a => a.id === action.id ? action : a));
     } else {
@@ -201,8 +204,54 @@ export default function RotationBuilder() {
     setCreateProductOpen(true);
   };
 
-  const sortedActions = actions || []; // Provide default empty array
+  const handleAiPrompt = async () => {
+    if (!aiPrompt) {
+      setSnackbar({
+        open: true,
+        message: 'Please enter a prompt',
+        severity: 'error'
+      });
+      return;
+    }
 
+    setIsAiLoading(true);
+    try {
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: aiPrompt })
+      });
+
+      if (!response.ok) throw new Error('Failed to get AI response');
+      
+      const data = await response.json();
+      // Try to parse and set actions directly
+      try {
+        const responseToJsonToGetActions = JSON.parse(data.response);
+        setActions(responseToJsonToGetActions.actions);
+        
+        setSnackbar({
+          open: true,
+          message: 'Rotation generated successfully!',
+          severity: 'success'
+        });
+      } catch{
+        throw new Error('Invalid rotation format received');
+      }
+    } catch {
+      setSnackbar({
+        open: true,
+        message: 'Failed to generate rotation',
+        severity: 'error'
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const sortedActions = actions || []; // Provide default empty array
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 2, mb: 3 }}>
@@ -269,6 +318,44 @@ export default function RotationBuilder() {
           Create Product
         </Button>
       </Box>
+
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <AutoFixHighIcon color="primary" />
+          <Typography variant="h6">AI Assistant</Typography>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
+        <TextField
+          fullWidth
+          multiline
+          minRows={4}
+          maxRows={20}
+          placeholder="Ask AI to help you build your rotation (e.g., 'Create a basic combat rotation for a frost mage')"
+          value={aiPrompt}
+          onChange={(e) => setAiPrompt(e.target.value)}
+          sx={{ 
+            mb: 2,
+            '& .MuiInputBase-root': {
+              resize: 'vertical',
+              overflow: 'auto',
+            },
+            '& textarea': {
+              resize: 'vertical',
+              lineHeight: 1.5,
+            }
+          }}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={handleAiPrompt}
+            disabled={isAiLoading}
+            startIcon={isAiLoading ? <CircularProgress size={20} /> : <AutoFixHighIcon />}
+          >
+            Generate Rotation
+          </Button>
+        </Box>
+      </Paper>
 
       <Menu
         anchorEl={menuAnchor}

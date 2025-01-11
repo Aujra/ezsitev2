@@ -11,25 +11,11 @@ interface ConditionFieldsProps {
 export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
   const fields = CONDITION_FIELD_DEFINITIONS[condition.type];
   
-  console.log('Rendering ConditionFields:', {
-    condition,
-    fields,
-    type: condition.type
-  });
-
   const isFieldVisible = (field: FieldDefinition) => {
     if (!field.dependent) return true;
     
     const dependentValue = getNestedValue(condition, field.dependent.key as string);
     const shouldShow = dependentValue === field.dependent.value;
-    
-    console.log('Field visibility check:', {
-      fieldKey: field.key,
-      dependentKey: field.dependent?.key,
-      dependentValue,
-      expectedValue: field.dependent?.value,
-      shouldShow
-    });
     
     return shouldShow;
   };
