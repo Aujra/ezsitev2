@@ -75,18 +75,37 @@ export async function POST(request: Request) {
         include: { items: true },
       });
     } else {
-      // Add new item to cart
-      await prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          type,
-          name,
-          price: totalPrice,
-          pricePerDay,
-          quantity,
-          days,
-        },
-      });
+      // Check if item already exists in cart
+      const existingItem = cart.items.find(
+        item => item.name === name
+      );
+
+      console.log("existingItem", existingItem);
+
+      if (existingItem) {
+        // Update existing item quantity and days
+        await prisma.cartItem.update({
+          where: { id: existingItem.id },
+          data: {
+            quantity: existingItem.quantity + quantity,
+            days: existingItem.days + days, // Update days to new value
+            price: (existingItem.days + days) * pricePerDay, // Recalculate price with new days
+          },
+        });
+      } else {
+        // Add new item to cart
+        await prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            type,
+            name,
+            price: totalPrice,
+            pricePerDay,
+            quantity,
+            days,
+          },
+        });
+      }
 
       // Fetch updated cart
       cart = await prisma.cart.findUnique({

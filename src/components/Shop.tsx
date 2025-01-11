@@ -19,7 +19,6 @@ import {
   Alert,
   Rating,
 } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ProductDetailModal from './ProductDetailModal';
 
 export default function Shop() {
@@ -56,7 +55,7 @@ export default function Shop() {
     }
   };
 
-  const handleAddToCart = async (product: Product) => {
+  const handleAddToCart = async (product: Product & { days: number }) => {
     try {
       const response = await fetch('/api/cart', {
         method: 'POST',
@@ -68,14 +67,14 @@ export default function Shop() {
           name: product.name,
           pricePerDay: product.pricePerDay,
           quantity: 1,
-          days: 30, // Default to 30 days
+          days: product.days,
         }),
       });
 
       if (!response.ok) throw new Error('Failed to add to cart');
 
-      await refreshCart(); // Refresh cart items
-      openCart(); // Open the cart drawer
+      await refreshCart();
+      openCart();
 
       setSnackbar({
         open: true,
@@ -121,12 +120,10 @@ export default function Shop() {
                   display: 'flex', 
                   flexDirection: 'column',
                   transition: 'transform 0.2s ease-in-out',
-                  cursor: 'pointer',
                   '&:hover': {
                     transform: 'translateY(-4px)',
                   },
                 }}
-                onClick={() => handleProductClick(product)}
               >
                 <Box sx={{ 
                   position: 'relative',
@@ -221,11 +218,13 @@ export default function Shop() {
                   </Box>
                   <Button 
                     variant="contained" 
-                    startIcon={<ShoppingCartIcon />}
-                    onClick={() => handleAddToCart(product)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProductClick(product);
+                    }}
                     size="small"
                   >
-                    Add to Cart
+                    View Product
                   </Button>
                 </CardActions>
               </Card>
@@ -254,5 +253,4 @@ export default function Shop() {
         </Alert>
       </Snackbar>
     </Box>
-  );
-}
+  );}

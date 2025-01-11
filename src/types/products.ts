@@ -10,6 +10,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
+  days: number;
   pricePerDay: number;
   tags: string[];
   images: string[];
