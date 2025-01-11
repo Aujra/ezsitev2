@@ -32,7 +32,10 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { type, name, price, quantity, days } = data;
+    const { type, name, pricePerDay, quantity, days } = data;
+
+    // Calculate total price based on days
+    const totalPrice = pricePerDay * days;
 
     // Validate required fields
     if (!type) {
@@ -41,8 +44,8 @@ export async function POST(request: Request) {
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
-    if (typeof price !== 'number') {
-      return NextResponse.json({ error: 'Valid price is required' }, { status: 400 });
+    if (typeof pricePerDay !== 'number') {
+      return NextResponse.json({ error: 'Valid price per day is required' }, { status: 400 });
     }
     if (typeof quantity !== 'number') {
       return NextResponse.json({ error: 'Valid quantity is required' }, { status: 400 });
@@ -55,7 +58,6 @@ export async function POST(request: Request) {
     });
 
     if (!cart) {
-      // Create new cart with first item
       cart = await prisma.cart.create({
         data: {
           userId: user.id,
@@ -63,7 +65,8 @@ export async function POST(request: Request) {
             create: {
               type,
               name,
-              price,
+              price: totalPrice,
+              pricePerDay,
               quantity,
               days,
             },
@@ -72,34 +75,18 @@ export async function POST(request: Request) {
         include: { items: true },
       });
     } else {
-      // Simplified logic: just check for game-time type
-      const existingGameTime = cart.items.find(item => item.type === 'game-time');
-
-      if (type === 'game-time' && existingGameTime) {
-        // Update existing game time item
-        const newTotalDays = (existingGameTime.days || 0) + (days || 0);
-        await prisma.cartItem.update({
-          where: { id: existingGameTime.id },
-          data: {
-            days: newTotalDays,
-            name: 'Game Time',
-            price: newTotalDays, // $1 per day
-            quantity: 1
-          }
-        });
-      } else {
-        // Add new item to cart
-        await prisma.cartItem.create({
-          data: {
-            cartId: cart.id,
-            type,
-            name: type === 'game-time' ? 'Game Time' : name,
-            price: type === 'game-time' ? days : price, // $1 per day for game-time
-            quantity,
-            days,
-          },
-        });
-      }
+      // Add new item to cart
+      await prisma.cartItem.create({
+        data: {
+          cartId: cart.id,
+          type,
+          name,
+          price: totalPrice,
+          pricePerDay,
+          quantity,
+          days,
+        },
+      });
 
       // Fetch updated cart
       cart = await prisma.cart.findUnique({

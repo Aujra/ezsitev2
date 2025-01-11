@@ -67,3 +67,43 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await requireAuth();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const rotationId = searchParams.get('id');
+
+    if (!rotationId) {
+      return NextResponse.json(
+        { success: false, error: 'Rotation ID is required' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.rotation.delete({
+      where: {
+        id: rotationId,
+        userId: user.id // Ensure user owns the rotation
+      }
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Rotation deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Error deleting rotation:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete rotation' },
+      { status: 500 }
+    );
+  }
+}

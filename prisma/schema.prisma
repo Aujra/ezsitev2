@@ -50,16 +50,17 @@ model Cart {
 }
 
 model CartItem {
-  id        String   @id @default(cuid())
-  cartId    String
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  type      String   // e.g., "game-time"
-  name      String
-  price     Float
-  quantity  Int      @default(1)
-  days      Int?     // Specific to game-time items
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  cartId      String
+  cart        Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  type        String   // e.g., "rotation"
+  name        String
+  price       Float    // Total price (pricePerDay * days)
+  pricePerDay Float    // Added pricePerDay field
+  quantity    Int      @default(1)
+  days        Int?     // Number of days for the rotation/license
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([cartId])
 }
@@ -101,7 +102,7 @@ model Product {
   rotation      Rotation? @relation(fields: [rotationId], references: [id])
   name          String
   description   String
-  price         Float
+  pricePerDay   Float     // Changed from price to pricePerDay
   tags          String[]
   images        String[]
   type          String    @default("rotation")

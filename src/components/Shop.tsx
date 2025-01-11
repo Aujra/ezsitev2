@@ -66,9 +66,9 @@ export default function Shop() {
         body: JSON.stringify({
           type: product.type,
           name: product.name,
-          price: product.price,
+          pricePerDay: product.pricePerDay,
           quantity: 1,
-          days: product.type === 'game-time' ? 30 : undefined, // Default to 30 days for game-time
+          days: 30, // Default to 30 days
         }),
       });
 
@@ -211,9 +211,14 @@ export default function Shop() {
                   borderTop: 1,
                   borderColor: 'divider'
                 }}>
-                  <Typography variant="h6" color="primary">
-                    ${product.price.toFixed(2)}
-                  </Typography>
+                  <Box>
+                    <Typography variant="h6" color="primary">
+                      ${product.pricePerDay.toFixed(2)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      per day
+                    </Typography>
+                  </Box>
                   <Button 
                     variant="contained" 
                     startIcon={<ShoppingCartIcon />}

@@ -214,7 +214,9 @@ export const CONDITION_FIELD_DEFINITIONS: Record<ConditionType, FieldDefinition[
 export interface SavedRotation {
   id: string;
   name: string;
+  data: {
   actions: RotationAction[];
+  };
   isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

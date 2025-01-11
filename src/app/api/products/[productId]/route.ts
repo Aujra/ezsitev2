@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
 export async function GET(
@@ -22,10 +23,77 @@ export async function GET(
     }
 
     return NextResponse.json(product);
-  } catch (error) {
-    console.error('Error fetching product:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to fetch product details' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ productId: string }> }
+) {
+  try {
+    const user = await requireAuth();
+    const { productId } = await context.params;
+    const data = await request.json();
+
+    // Verify ownership
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product || product.userId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const updated = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        name: data.name,
+        description: data.description,
+        pricePerDay: data.pricePerDay,
+        tags: data.tags,
+        status: data.status,
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch {
+    return NextResponse.json(
+      { error: 'Failed to update product' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ productId: string }> }
+) {
+  try {
+    const user = await requireAuth();
+    const { productId } = await context.params;
+
+    // Verify ownership
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product || product.userId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json(
+      { error: 'Failed to delete product' },
       { status: 500 }
     );
   }

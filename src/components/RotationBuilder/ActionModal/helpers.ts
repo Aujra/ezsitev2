@@ -111,7 +111,6 @@ export function validateCondition(condition: Condition): boolean {
 }
 
 export function getConditionDescription(condition: Condition): string {
-  console.log('condition', condition);
   switch (condition.type) {
     case 'HP':
       return `HP ${condition.operator} ${condition.value}%`;

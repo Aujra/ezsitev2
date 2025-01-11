@@ -135,7 +135,7 @@ export default function ProductDetailModal({
 
             <Box sx={{ mt: 'auto' }}>
               <Typography variant="h5" color="primary" gutterBottom>
-                ${currentProduct.price.toFixed(2)}
+                ${currentProduct.pricePerDay.toFixed(2) + " / day"}
               </Typography>
               <Button
                 variant="contained"

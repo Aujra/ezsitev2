@@ -10,7 +10,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  pricePerDay: number;
   tags: string[];
   images: string[];
   type: string;

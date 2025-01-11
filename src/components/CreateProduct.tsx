@@ -27,7 +27,7 @@ interface CreateProductProps {
 export default function CreateProduct({ open, onClose, rotation }: CreateProductProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+  const [pricePerDay, setPricePerDay] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [images, setImages] = useState<File[]>([]);
@@ -74,7 +74,7 @@ export default function CreateProduct({ open, onClose, rotation }: CreateProduct
         body: JSON.stringify({
           name,
           description,
-          price: parseFloat(price),
+          pricePerDay: parseFloat(pricePerDay),
           tags,
           images: imageUrls,
           rotationId: rotation.id,
@@ -109,10 +109,13 @@ export default function CreateProduct({ open, onClose, rotation }: CreateProduct
             fullWidth
           />
           <TextField
-            label="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            label="Price per Day"
+            value={pricePerDay}
+            onChange={(e) => setPricePerDay(e.target.value)}
             type="number"
+            InputProps={{
+              startAdornment: <span>$</span>,
+            }}
             fullWidth
           />
           <Box>
@@ -185,7 +188,7 @@ export default function CreateProduct({ open, onClose, rotation }: CreateProduct
         <Button 
           onClick={handleSubmit}
           variant="contained"
-          disabled={!name || !description || !price}
+          disabled={!name || !description || !pricePerDay}
         >
           Create Product
         </Button>

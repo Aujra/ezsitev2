@@ -31,6 +31,7 @@ import Orders from '@/components/Orders';
 import Logo from '@/components/Logo';
 import RotationBuilder from '@/components/RotationBuilder';
 import Shop from '@/components/Shop';
+import YourProducts from '@/components/YourProducts';
 
 const DRAWER_WIDTH = 240;
 
@@ -67,6 +68,7 @@ export default function Dashboard() {
     { text: 'Shop', icon: <ShopIcon /> },
     { text: 'Orders', icon: <ShoppingCartIcon /> },
     { text: 'Rotation Builder', icon: <AutoFixHighIcon /> },
+    { text: 'Your Products', icon: <AutoFixHighIcon /> },
   ];
 
   const drawer = (
@@ -135,6 +137,8 @@ export default function Dashboard() {
         return <RotationBuilder />;
       case 'Shop':
         return <Shop />;
+      case 'Your Products':
+        return <YourProducts />
       default:
         return (
           <>

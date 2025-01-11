@@ -38,7 +38,7 @@ export default function RotationBuilder() {
     message: '',
     severity: 'success'
   });
-  const [savedRotations, setSavedRotations] = useState<SavedRotation[]>([]);
+  const [savedRotations, setSavedRotations] = useState<SavedRotation[]>([]); // Initialize with empty array
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [createProductOpen, setCreateProductOpen] = useState(false);
   const [selectedRotation, setSelectedRotation] = useState<SavedRotation | null>(null);
@@ -52,13 +52,14 @@ export default function RotationBuilder() {
       const response = await fetch('/api/rotations');
       if (!response.ok) throw new Error('Failed to fetch rotations');
       const data = await response.json();
-      setSavedRotations(data);
+      setSavedRotations(data || []); // Ensure we always set an array
     } catch {
       setSnackbar({
         open: true,
         message: 'Failed to fetch rotations',
         severity: 'error'
       });
+      setSavedRotations([]); // Set empty array on error
     }
   };
 
@@ -129,13 +130,44 @@ export default function RotationBuilder() {
 
   const handleLoadRotation = (rotation: SavedRotation) => {
     setRotationName(rotation.name);
-    setActions(rotation.actions); // Changed from rotation.data.actions
+    // Safely handle the rotation data structure
+    const rotationActions = rotation.data?.actions || [];
+    setActions(rotationActions);
     setMenuAnchor(null);
     setSnackbar({
       open: true,
       message: 'Rotation loaded successfully!',
       severity: 'success'
     });
+  };
+
+  const handleDeleteRotation = async (rotation: SavedRotation) => {
+    if (!confirm(`Are you sure you want to delete "${rotation.name}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/rotations?id=${rotation.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete rotation');
+      }
+
+      await fetchRotations(); // Refresh the list
+      setSnackbar({
+        open: true,
+        message: 'Rotation deleted successfully!',
+        severity: 'success'
+      });
+    } catch {
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete rotation',
+        severity: 'error'
+      });
+    }
   };
 
   const handleDragEnd = (result: DropResult) => {
@@ -169,12 +201,29 @@ export default function RotationBuilder() {
     setCreateProductOpen(true);
   };
 
-  const sortedActions = actions;
+  const sortedActions = actions || []; // Provide default empty array
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 2, mb: 3 }}>
         <Typography variant="h4">Rotation Builder</Typography>
+        {selectedRotation && (
+          <Typography 
+            variant="subtitle1" 
+            color="primary.main"
+            sx={{ 
+              ml: 2,
+              fontStyle: 'italic',
+              display: 'flex',
+              alignItems: 'center' 
+            }}
+          >
+            Editing: {selectedRotation.name}
+          </Typography>
+        )}
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 2, mb: 3 }}>
         <TextField
           size="small"
           placeholder="Rotation Name"
@@ -198,7 +247,7 @@ export default function RotationBuilder() {
           size="small"
           startIcon={<SaveIcon />}
           onClick={handleSave}
-          disabled={!rotationName || actions.length === 0}
+          disabled={!rotationName || (actions && actions.length === 0)}
         >
           Save Rotation
         </Button>
@@ -215,7 +264,7 @@ export default function RotationBuilder() {
           size="small"
           startIcon={<ShoppingCartIcon />}
           onClick={handleCreateProduct}
-          disabled={actions.length === 0}
+          disabled={!actions || actions.length === 0}
         >
           Create Product
         </Button>
@@ -228,10 +277,27 @@ export default function RotationBuilder() {
       >
         {savedRotations.map((rotation: SavedRotation) => (
           <MenuItem 
-            key={rotation.id} 
-            onClick={() => handleLoadRotation(rotation)}
+            key={rotation.id}
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 2 
+            }}
           >
-            {rotation.name}
+            <Typography onClick={() => handleLoadRotation(rotation)}>
+              {rotation.name}
+            </Typography>
+            <IconButton
+              size="small"
+              color="error"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteRotation(rotation);
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
           </MenuItem>
         ))}
         {savedRotations.length === 0 && (

@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export const POST = async (req: NextRequest) => {
   try {
     const user = await requireAuth();
-    const { name, description, price, tags, images, rotationId } = await req.json();
+    const { name, description, pricePerDay, tags, images, rotationId } = await req.json();
     
     const product = await prisma.product.create({
       data: {
@@ -13,7 +13,7 @@ export const POST = async (req: NextRequest) => {
         rotationId,
         name,
         description,
-        price,
+        pricePerDay,  // Changed from price to pricePerDay
         tags,
         images,
         type: 'rotation',
@@ -22,8 +22,7 @@ export const POST = async (req: NextRequest) => {
     });
 
     return NextResponse.json(product);
-  } catch (error) {
-    console.log('Failed to create product:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to create product' },
       { status: 401 }
