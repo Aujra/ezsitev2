@@ -9,11 +9,12 @@ import {
   CooldownCondition,
   ChargesCondition,
   StacksCondition,
-  CompositeCondition
+  CompositeCondition,
+  BaseConditions,
 } from '@/types/rotation';
 import { generateId } from '@/lib/utils';
 
-export function createDefaultCondition(type: ConditionType): Condition {
+export function createDefaultCondition(type: ConditionType): Partial<BaseConditions> | undefined {
   const baseCondition = { type };
 
   switch (type) {
@@ -26,12 +27,20 @@ export function createDefaultCondition(type: ConditionType): Condition {
 
     case 'Aura':
       return {
-        ...baseCondition,
+        type: 'Aura',
         target: 'Self',
         auraName: '',
+        auraType: 'Buff',  // Default to Buff
+        checkType: 'presence',
         isPresent: true,
-        stacks: undefined,
-        operator: undefined
+        duration: {
+          remaining: 0,
+          operator: '>'
+        },
+        stacks: {
+          count: 0,
+          operator: '>'
+        }
       } as AuraCondition;
 
     case 'Resource':
@@ -66,6 +75,9 @@ export function createDefaultCondition(type: ConditionType): Condition {
         operator: '>',
         value: 0
       } as StacksCondition;
+
+    default:
+      return undefined;
   }
 }
 
@@ -116,9 +128,17 @@ export function getConditionDescription(condition: Condition): string {
       return `HP ${condition.operator} ${condition.value}%`;
     
     case 'Aura':
-      return `${condition.auraName} ${condition.isPresent ? 'present' : 'not present'} on ${condition.target}${
-        condition.stacks ? ` with ${condition.operator} ${condition.stacks} stacks` : ''
-      }`;
+      const { auraType, auraName, target, checkType } = condition;
+      switch (checkType) {
+        case 'presence':
+          return `${auraType} ${auraName} ${condition.isPresent ? 'present' : 'not present'} on ${target}`;
+        case 'duration':
+          return `${auraType} ${auraName} on ${target} with ${condition.duration?.operator} ${condition.duration?.remaining}s remaining`;
+        case 'stacks':
+          return `${auraType} ${auraName} on ${target} with ${condition.stacks?.operator} ${condition.stacks?.count} stacks`;
+        default:
+          return `Invalid aura check type`;
+      }
     
     case 'Resource':
       return `${condition.resource} ${condition.operator} ${condition.value}`;

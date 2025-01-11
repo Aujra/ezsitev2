@@ -9,13 +9,66 @@ interface ConditionFieldsProps {
 }
 
 export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
+  const fields = CONDITION_FIELD_DEFINITIONS[condition.type];
+  
+  console.log('Rendering ConditionFields:', {
+    condition,
+    fields,
+    type: condition.type
+  });
+
+  const isFieldVisible = (field: FieldDefinition) => {
+    if (!field.dependent) return true;
+    
+    const dependentValue = getNestedValue(condition, field.dependent.key as string);
+    const shouldShow = dependentValue === field.dependent.value;
+    
+    console.log('Field visibility check:', {
+      fieldKey: field.key,
+      dependentKey: field.dependent?.key,
+      dependentValue,
+      expectedValue: field.dependent?.value,
+      shouldShow
+    });
+    
+    return shouldShow;
+  };
+
+  const getNestedValue = (obj: BaseConditions, path: string): unknown => {
+    return path.split('.').reduce((acc, part) => {
+      if (acc && typeof acc === 'object') {
+        return (acc as Record<string, unknown>)[part];
+      }
+      return undefined;
+    }, obj as unknown);
+  };
+
+  const setNestedValue = (path: string, value: string | number | boolean): void => {
+    const parts = path.split('.');
+    if (parts.length === 1) {
+      onUpdate({ [path]: value });
+    } else {
+      const [parent, child] = parts;
+      const parentObj = condition[parent as keyof typeof condition];
+      
+      // Type guard to ensure parentObj is an object
+      if (parentObj && typeof parentObj === 'object' && !Array.isArray(parentObj)) {
+        const updatedParent = {
+          // @ts-expect-error this spreads fine
+          ...parentObj,
+          [child]: value
+        };
+        onUpdate({ [parent]: updatedParent });
+      }
+    }
+  };
+
   const renderField = (field: FieldDefinition) => {
-    // Type-safe property access
-    const fieldValue = condition[field.key as keyof typeof condition];
+    const fieldValue = getNestedValue(condition, field.key as string);
     
     if (field.dependent) {
-      const dependentValue = condition[field.dependent.key as keyof typeof condition];
-      if (Boolean(dependentValue) !== field.dependent.value) {
+      const dependentValue = getNestedValue(condition, field.dependent.key as string);
+      if (dependentValue !== field.dependent.value) {
         return null;
       }
     }
@@ -26,7 +79,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
           <TextField
             label={field.label}
             value={String(fieldValue || '')}
-            onChange={e => onUpdate({ [field.key]: e.target.value })}
+            onChange={e => setNestedValue(field.key as string, e.target.value)}
             sx={{ width: '200px' }}
           />
         );
@@ -36,7 +89,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
             label={field.label}
             type="number"
             value={Number(fieldValue || 0)}
-            onChange={e => onUpdate({ [field.key]: Number(e.target.value) })}
+            onChange={e => setNestedValue(field.key as string, Number(e.target.value))}
             sx={{ width: '100px' }}
           />
         );
@@ -47,7 +100,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
             <Select
               value={String(fieldValue || '')}
               label={field.label}
-              onChange={e => onUpdate({ [field.key]: e.target.value })}
+              onChange={e => setNestedValue(field.key as string, e.target.value)}
             >
               {field.options?.map(option => (
                 <MenuItem key={option} value={option}>{option}</MenuItem>
@@ -61,7 +114,7 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
             control={
               <Switch
                 checked={Boolean(fieldValue)}
-                onChange={e => onUpdate({ [field.key]: e.target.checked })}
+                onChange={e => setNestedValue(field.key as string, e.target.checked)}
               />
             }
             label={field.label}
@@ -70,23 +123,76 @@ export function ConditionFields({ condition, onUpdate }: ConditionFieldsProps) {
     }
   };
 
-  const fields = CONDITION_FIELD_DEFINITIONS[condition.type];
-
   return (
     <Box sx={{ 
-      display: 'flex', 
-      flexDirection: { xs: 'column', md: 'row' },
+      display: 'flex',
+      flexDirection: 'column',
       gap: 2,
-      alignItems: { xs: 'stretch', md: 'center' },
-      '& .MuiFormControl-root': {
-        minWidth: { xs: '100%', md: 'auto' }
-      }
     }}>
-      {fields.map((field, index) => (
-        <Box key={`${String(field.key)}-${index}`}>
-          {renderField(field)}
+      {/* Basic Info Group - Only non-dependent, non-switch fields */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'row',
+        gap: 2,
+        flexWrap: 'wrap',
+      }}>
+        {fields
+          .filter(field => !field.dependent && field.type !== 'switch' && field.key !== 'isPresent')
+          .map((field, index) => (
+            <Box key={`${String(field.key)}-${index}`}>
+              {renderField(field)}
+            </Box>
+          ))}
+      </Box>
+
+      {/* Switches Group - Only non-dependent switches */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'row',
+        gap: 2,
+        flexWrap: 'wrap',
+      }}>
+        {fields
+          .filter(field => !field.dependent && field.type === 'switch')
+          .map((field, index) => (
+            <Box key={`${String(field.key)}-${index}`}>
+              {renderField(field)}
+            </Box>
+          ))}
+      </Box>
+
+      {/* Dependent Fields Group */}
+      {condition.type === 'Aura' && (
+        <Box sx={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          mt: 1,
+          p: 2,
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 1,
+        }}>
+          {fields
+            .filter(field => field.dependent)
+            .map((field, index) => {
+              if (!isFieldVisible(field)) return null;
+              return (
+                <Box 
+                  key={`${String(field.key)}-${index}`}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 2,
+                    alignItems: 'center'
+                  }}
+                >
+                  {renderField(field)}
+                </Box>
+              );
+            })}
         </Box>
-      ))}
+      )}
     </Box>
   );
 }

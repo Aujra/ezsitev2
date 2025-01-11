@@ -2,13 +2,13 @@ import { OPERATORS, TARGETS, RESOURCES } from "@/components/RotationBuilder/Acti
 import { generateId } from '@/lib/utils';
 
 // Update ConditionType to include 'RecentlyCast'
-export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks' | 'RecentlyCast';
+export type ConditionType = 'HP' | 'Aura' | 'Resource' | 'Cooldown' | 'Charges' | 'Stacks';
 export type Target = 'Self' | 'Target' | 'Focus' | 'Tank' | 'Party1' | 'Party2' | 'Party3' | 'Party4';
 export type Operator = '>' | '<' | '=' | '>=' | '<=';
-export type Resource = 'Mana' | 'Rage' | 'Energy' | 'Focus' | 'RunicPower';
+export type Resource = 'Mana' | 'Rage' | 'Energy' | 'Focus' | 'RunicPower' | 'HolyPower';
 export type LogicalOperator = 'AND' | 'OR' | 'NOT';
 
-type ConditionKeys = keyof (HPCondition & AuraCondition & ResourceCondition & CooldownCondition & ChargesCondition & StacksCondition & RecentlyCastCondition);
+export type AuraType = 'Buff' | 'Debuff';
 
 interface BaseCondition {
   type: ConditionType;
@@ -17,11 +17,11 @@ interface BaseCondition {
 export interface FieldDefinition {
   type: 'text' | 'number' | 'select' | 'switch';
   label: string;
-  key: ConditionKeys;
-  options?: readonly (Target | Operator | Resource)[];
+  key: string;  // Change to string to support nested paths
+  options?: readonly (Target | Operator | Resource | AuraType | AuraCheckType)[];  // Add AuraType and AuraCheckType
   dependent?: {
-    key: ConditionKeys;
-    value: boolean;  // Changed from 'FieldOptionType' to just 'boolean'
+    key: string;  // Change to string to support nested paths
+    value: string | boolean;  // Update to allow string values for checkType
     show: boolean;
   };
 }
@@ -32,13 +32,24 @@ export interface HPCondition extends BaseCondition {
   value: number;
 }
 
+export type AuraCheckType = 'presence' | 'duration' | 'stacks';
+
 export interface AuraCondition extends BaseCondition {
   type: 'Aura';
   target: Target;
   auraName: string;
-  isPresent: boolean;
-  stacks?: number;
-  operator?: Operator;
+  auraType: AuraType;
+  checkType: AuraCheckType;
+  // Mutually exclusive fields based on checkType
+  isPresent?: boolean;      // For 'presence'
+  duration?: {              // For 'duration'
+    remaining: number;
+    operator: Operator;
+  };
+  stacks?: {               // For 'stacks'
+    count: number;
+    operator: Operator;
+  };
 }
 
 export interface ResourceCondition extends BaseCondition {
@@ -136,8 +147,43 @@ export const CONDITION_FIELD_DEFINITIONS: Record<ConditionType, FieldDefinition[
   Aura: [
     { type: 'text', label: 'Aura Name', key: 'auraName' },
     { type: 'select', label: 'Target', key: 'target', options: TARGETS },
-    { type: 'switch', label: 'Is Present', key: 'isPresent' },
-    { type: 'number', label: 'Stacks', key: 'stacks' }
+    { type: 'select', label: 'Aura Type', key: 'auraType', options: ['Buff', 'Debuff'] as const }, // Add as const
+    { type: 'select', label: 'Check Type', key: 'checkType', options: ['presence', 'duration', 'stacks'] as const }, // Add as const
+    // Presence fields
+    { 
+      type: 'switch', 
+      label: 'Is Present', 
+      key: 'isPresent',
+      dependent: { key: 'checkType', value: 'presence', show: true }
+    },
+    // Duration fields
+    { 
+      type: 'select', 
+      label: 'Duration Operator', 
+      key: 'duration.operator',
+      options: OPERATORS,
+      dependent: { key: 'checkType', value: 'duration', show: true }
+    },
+    { 
+      type: 'number', 
+      label: 'Duration Remaining (seconds)', 
+      key: 'duration.remaining',
+      dependent: { key: 'checkType', value: 'duration', show: true }
+    },
+    // Stack fields
+    { 
+      type: 'select', 
+      label: 'Stacks Operator', 
+      key: 'stacks.operator',
+      options: OPERATORS,
+      dependent: { key: 'checkType', value: 'stacks', show: true }
+    },
+    { 
+      type: 'number', 
+      label: 'Stacks Count', 
+      key: 'stacks.count',
+      dependent: { key: 'checkType', value: 'stacks', show: true }
+    }
   ],
   Resource: [
     { type: 'select', label: 'Resource', key: 'resource', options: RESOURCES },
